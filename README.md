@@ -14,7 +14,7 @@ portfolio/
 ├── content/
 │   └── projects.json       ← ⭐ ALL your projects live here
 ├── assets/
-│   ├── images/             ← hero background, your profile photo, favicon
+│   ├── images/             ← your hero cut-out photo, About photo, favicon
 │   ├── projects/
 │   │   ├── robotic-arm/              ← one folder of photos per project
 │   │   ├── autonomous-mobile-robot/
@@ -128,17 +128,18 @@ That's it — both the **View** and **Download** buttons point to that file.
 
 ## 3. Change photos
 
-| Photo | File to replace | Best shape |
+| Photo | File | Notes |
 |---|---|---|
-| Big hero background | `assets/images/hero.svg` | Wide landscape, ~2400 × 1500 px. Darker images make the white text easier to read |
-| Your portrait (About) | `assets/images/profile.svg` | Portrait, 4:5 (e.g. 800 × 1000 px) |
+| Front-page photo (big cut-out of you) | `assets/images/hero-portrait.webp` | Must have a **transparent background** (a "cut-out"), so only you show on the dark backdrop. Upper body, roughly 1086 × 1320 px works well |
+| About photo | `assets/images/profile.jpg` | Any normal portrait photo. Shown in a rounded 4:5 frame |
 | Browser tab icon | `assets/images/favicon.svg` | Square |
 
-The placeholders are `.svg` files. Your photos will probably be `.jpg`, so either:
-- **Easiest:** name your photo e.g. `hero.jpg`, drop it in `assets/images/`, then in `index.html` change `assets/images/hero.svg` to `assets/images/hero.jpg` (search for `hero.svg`; it appears 2–3 times). Do the same for `profile.svg`.
-- Then delete the old `.svg` placeholder.
+**Easiest way to swap a photo:** give your new file the *exact same name* as the old one (for example `profile.jpg`) and upload it over the old file. No code changes needed.
 
-**Using a video as the hero background:** put a short, muted `.mp4` (ideally under ~8 MB) at `assets/images/hero.mp4`. In `index.html`, find the hero section, delete the `<img class="hero-img" …>` line and remove the `<!--` and `-->` around the `<video …>` line.
+**Making a cut-out (transparent background) for the front page:**
+1. Go to a free background remover such as [remove.bg](https://www.remove.bg) or Adobe Express's "Remove background" tool, and upload your photo.
+2. Download the result as a **PNG**.
+3. Either upload it as `assets/images/hero-portrait.png` and, in `index.html`, change `hero-portrait.webp` to `hero-portrait.png`, **or** convert it to WebP first (smaller, faster) at [squoosh.app](https://squoosh.app) and upload it as `hero-portrait.webp`.
 
 **Project photos:** just replace the files in `assets/projects/<project-name>/` and update the paths in `content/projects.json`.
 
@@ -148,8 +149,9 @@ The placeholders are `.svg` files. Your photos will probably be `.jpg`, so eithe
 
 All in `index.html` — search for `✏️ EDIT`:
 
-- **Name** — in the `<title>`, the nav logo, the big hero heading, the About heading ("Hello, I'm…"), and the footer.
-- **Tagline** — the line under your name in the hero.
+- **Name** — in the `<title>`, the nav logo, the front-page headline, the photo descriptions (`alt="Portrait of Your Name"`), the About heading ("Hello, I'm…"), and the footer. Searching `index.html` for **Your Name** finds them all.
+- **Headline** — "I'm Your Name, a Robotics Engineer" on the front page.
+- **Tagline** — the line under the headline on the front page.
 - **Bio** — the paragraphs marked `data-lines` in the About section. Change the text between `<p …>` and `</p>`. Add a paragraph by copying one of the `<p class="bio" data-lines>…</p>` lines. Keep bio paragraphs as plain text (no links) so the line-by-line animation works.
 - **Quick facts** — Education / Focus / Based in, just below the bio.
 - **Email, LinkedIn, GitHub** — in the Contact section *and* the GitHub icon in the nav. Replace every `YOUR-USERNAME` (search the file for it) and `you@northeastern.edu`.

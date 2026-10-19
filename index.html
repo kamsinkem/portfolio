@@ -11,7 +11,7 @@
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <meta property="og:title" content="Your Name — Robotics Engineer">
   <meta property="og:description" content="M.S. Robotics, Northeastern University.">
-  <meta property="og:image" content="assets/images/hero.svg">
+  <meta property="og:image" content="assets/images/profile.jpg">
   <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,30 +65,22 @@
   <main id="main">
     <!-- ============ 1. HERO ============ -->
     <section class="hero" id="home" aria-label="Introduction">
-      <div class="hero-media" aria-hidden="true">
-        <!-- ✏️ EDIT: swap this image for your own (see README → "Change photos").
-             Want a video instead? Delete the <img> line and uncomment the <video> below. -->
-        <img class="hero-img" src="assets/images/hero.svg" alt="">
-        <!--
-        <video class="hero-img" src="assets/images/hero.mp4" poster="assets/images/hero.svg" autoplay muted loop playsinline></video>
-        -->
-      </div>
-
       <div class="hero-content">
+        <span class="hero-rule" data-hero aria-hidden="true"></span>
         <p class="hero-eyebrow" data-hero>M.S. Robotics, Northeastern University</p>
         <!-- ✏️ EDIT: your name -->
-        <h1 class="hero-title" data-hero>Your Name</h1>
+        <h1 class="hero-title" data-hero>I'm Your Name, a Robotics Engineer</h1>
         <!-- ✏️ EDIT: your tagline -->
         <p class="hero-tagline" data-hero>Building robots that see, think, and move — from motion planning to perception.</p>
-        <div class="hero-actions" data-hero>
-          <a class="btn btn-primary" href="#projects">See my work</a>
-          <a class="btn btn-light" href="#contact">Get in touch</a>
-        </div>
+        <a class="hero-down" href="#about" data-hero aria-label="Scroll to About">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+        </a>
       </div>
 
-      <a class="scroll-cue" href="#about" aria-label="Scroll to About">
-        <span></span>
-      </a>
+      <!-- ✏️ EDIT: your cut-out photo (transparent background works best — see README → "Change photos") -->
+      <div class="hero-portrait">
+        <img src="assets/images/hero-portrait.webp" alt="Portrait of Your Name" width="1086" height="1320" fetchpriority="high">
+      </div>
     </section>
 
     <!-- ============ 2. ABOUT ============ -->
@@ -100,7 +92,7 @@
         <div class="about-grid">
           <figure class="about-photo" data-reveal>
             <!-- ✏️ EDIT: your photo (see README → "Change photos") -->
-            <img src="assets/images/profile.svg" alt="Portrait of Your Name" loading="lazy" width="800" height="1000">
+            <img src="assets/images/profile.jpg" alt="Portrait of Your Name" loading="lazy" width="1086" height="1448">
           </figure>
 
           <div class="about-text">

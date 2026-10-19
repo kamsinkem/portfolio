@@ -65,6 +65,15 @@
     $$('.nav-links a').forEach((a) => a.addEventListener('click', () => setMenu(false)));
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
 
+    // Switch the nav to dark colors while it sits over the dark hero.
+    const hero = $('.hero');
+    if (hero) {
+      const updateNavTone = () => header.classList.toggle('on-dark', hero.getBoundingClientRect().bottom > header.offsetHeight);
+      window.addEventListener('scroll', updateNavTone, { passive: true });
+      window.addEventListener('resize', updateNavTone);
+      updateNavTone();
+    }
+
     // Highlight the nav link of whichever section crosses the middle of the screen.
     const sections = $$('main > section[id]');
     const observer = new IntersectionObserver((entries) => {
@@ -266,20 +275,21 @@
   function initAnimations() {
     if (!animate) return;
 
-    // Hero: text fades + scales in on load
+    // Hero: portrait rises in, then the text fades + scales in beside it
     gsap.timeline({ defaults: { ease: 'power3.out' } })
-      .fromTo('.hero-img', { scale: 1.12 }, { scale: 1, duration: 2.2, ease: 'power2.out' }, 0)
-      .fromTo('[data-hero]',
+      .fromTo('.hero-portrait img', { opacity: 0, y: 80 }, { opacity: 1, y: 0, duration: 1.6 }, 0)
+      .fromTo('.hero-rule', { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.9 }, 0.25)
+      .fromTo('[data-hero]:not(.hero-rule)',
         { opacity: 0, y: 40, scale: 0.94 },
-        { opacity: 1, y: 0, scale: 1, duration: 1.2, stagger: 0.14 }, 0.2);
+        { opacity: 1, y: 0, scale: 1, duration: 1.2, stagger: 0.12 }, 0.35);
 
-    // Hero: background zooms + parallaxes, text drifts up and fades as you scroll
-    gsap.to('.hero-media', {
-      yPercent: 18, scale: 1.12, ease: 'none',
+    // Hero: portrait zooms + parallaxes, text drifts up and fades as you scroll
+    gsap.to('.hero-portrait img', {
+      yPercent: 14, scale: 1.08, transformOrigin: '50% 100%', ease: 'none',
       scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
     });
     gsap.to('.hero-content', {
-      yPercent: -25, opacity: 0, ease: 'none',
+      yPercent: -20, opacity: 0, ease: 'none',
       scrollTrigger: { trigger: '.hero', start: 'top top', end: '70% top', scrub: true }
     });
 
