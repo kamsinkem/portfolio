@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1500" width="2400" height="1500">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b2440"/><stop offset="1" stop-color="#05070d"/>
+    </linearGradient>
+    <pattern id="grid" width="120" height="120" patternUnits="userSpaceOnUse">
+      <path d="M 120 0 L 0 0 0 120" fill="none" stroke="#fff" stroke-opacity=".07" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="2400" height="1500" fill="url(#g)"/>
+  <rect width="2400" height="1500" fill="url(#grid)"/>
+  <g fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="16.800000000000004" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="1068.0" y="1080.0" width="264.00000000000006" height="60.00000000000001" rx="14.400000000000002" fill="#fff" fill-opacity=".12"/>
+    <path d="M1200.0 1080.0 L1128.0 768.0 L1416.0 576.0 L1560.0 684.0"/>
+    <circle cx="1200.0" cy="1080.0" r="31.200000000000003" fill="#fff" fill-opacity=".25"/>
+    <circle cx="1128.0" cy="768.0" r="28.800000000000004" fill="#fff" fill-opacity=".25"/>
+    <circle cx="1416.0" cy="576.0" r="24.000000000000004" fill="#fff" fill-opacity=".25"/>
+    <path d="M1560.0 684.0 l48.00000000000001 -24.000000000000004 M1560.0 684.0 l36.00000000000001 42.00000000000001"/>
+  </g>
+  <text x="1200.0" y="1395.0" text-anchor="middle" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="43" font-weight="600" fill="#fff" fill-opacity=".55" letter-spacing="1">HERO IMAGE — replace assets/images/hero.svg</text>
+</svg>

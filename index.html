@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- ✏️ EDIT: your name and a one-line description (shown in Google results and link previews) -->
+  <title>Your Name — Robotics Engineer</title>
+  <meta name="description" content="Portfolio of Your Name, M.S. Robotics student at Northeastern University.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta property="og:title" content="Your Name — Robotics Engineer">
+  <meta property="og:description" content="M.S. Robotics, Northeastern University.">
+  <meta property="og:image" content="assets/images/hero.svg">
+  <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Hides animated elements before GSAP runs (skipped entirely for reduced-motion users) -->
+  <script>
+    (function () {
+      var root = document.documentElement;
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) root.classList.add('motion');
+      // Safety net: never leave content hidden if scripts fail to load.
+      setTimeout(function () { if (!root.classList.contains('ready')) root.classList.remove('motion'); }, 3000);
+    })();
+  </script>
+
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script defer src="js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============ NAVIGATION ============ -->
+  <header class="nav" id="nav">
+    <nav class="nav-inner" aria-label="Primary">
+      <!-- ✏️ EDIT: your name -->
+      <a class="nav-logo" href="#home">Your Name</a>
+
+      <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="nav-menu">
+        <span></span><span></span>
+      </button>
+
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="#home" data-nav="home">Home</a></li>
+        <li><a href="#about" data-nav="about">About</a></li>
+        <li><a href="#projects" data-nav="projects">Projects</a></li>
+        <li><a href="#contact" data-nav="contact">Contact</a></li>
+        <li>
+          <!-- ✏️ EDIT: your GitHub URL -->
+          <a class="nav-icon" href="https://github.com/YOUR-USERNAME" target="_blank" rel="noopener" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.4-5.27 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
+            <span class="nav-icon-label">GitHub</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- ============ 1. HERO ============ -->
+    <section class="hero" id="home" aria-label="Introduction">
+      <div class="hero-media" aria-hidden="true">
+        <!-- ✏️ EDIT: swap this image for your own (see README → "Change photos").
+             Want a video instead? Delete the <img> line and uncomment the <video> below. -->
+        <img class="hero-img" src="assets/images/hero.svg" alt="">
+        <!--
+        <video class="hero-img" src="assets/images/hero.mp4" poster="assets/images/hero.svg" autoplay muted loop playsinline></video>
+        -->
+      </div>
+
+      <div class="hero-content">
+        <p class="hero-eyebrow" data-hero>M.S. Robotics, Northeastern University</p>
+        <!-- ✏️ EDIT: your name -->
+        <h1 class="hero-title" data-hero>Your Name</h1>
+        <!-- ✏️ EDIT: your tagline -->
+        <p class="hero-tagline" data-hero>Building robots that see, think, and move — from motion planning to perception.</p>
+        <div class="hero-actions" data-hero>
+          <a class="btn btn-primary" href="#projects">See my work</a>
+          <a class="btn btn-light" href="#contact">Get in touch</a>
+        </div>
+      </div>
+
+      <a class="scroll-cue" href="#about" aria-label="Scroll to About">
+        <span></span>
+      </a>
+    </section>
+
+    <!-- ============ 2. ABOUT ============ -->
+    <section class="section" id="about" aria-labelledby="about-title">
+      <div class="container">
+        <p class="section-eyebrow" data-reveal>About</p>
+        <h2 class="section-title" id="about-title" data-reveal>Hello, I'm Your&nbsp;Name.</h2>
+
+        <div class="about-grid">
+          <figure class="about-photo" data-reveal>
+            <!-- ✏️ EDIT: your photo (see README → "Change photos") -->
+            <img src="assets/images/profile.svg" alt="Portrait of Your Name" loading="lazy" width="800" height="1000">
+          </figure>
+
+          <div class="about-text">
+            <!-- ✏️ EDIT YOUR BIO: change the text inside each <p data-lines> … </p>.
+                 Add or remove paragraphs freely. Keep it plain text (no links) so the
+                 line-by-line animation works. -->
+            <p class="bio-lead" data-lines>I'm a robotics engineer finishing my Master's at Northeastern University, where I work at the intersection of manipulation, autonomy, and perception.</p>
+            <p class="bio" data-lines>I love taking a robot from a sketch in SolidWorks all the way to a system that runs reliably in the real world. Most of my work lives in ROS 2, Python, and C++, with a healthy amount of soldering in between.</p>
+            <p class="bio" data-lines>Outside the lab you'll find me mentoring FIRST Robotics teams, hiking the White Mountains, or 3D-printing something that probably didn't need to be 3D-printed.</p>
+
+            <!-- ✏️ EDIT: quick facts -->
+            <dl class="facts" data-reveal>
+              <div><dt>Education</dt><dd>M.S. Robotics, Northeastern University<br>B.S. Mechanical Engineering, Your University</dd></div>
+              <div><dt>Focus</dt><dd>Motion planning, SLAM, computer vision, manipulation</dd></div>
+              <div><dt>Based in</dt><dd>Boston, MA</dd></div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 3. PROJECTS ============ -->
+    <!-- Project cards are built automatically from content/projects.json — no need to edit here. -->
+    <section class="section section-alt" id="projects" aria-labelledby="projects-title">
+      <div class="container">
+        <p class="section-eyebrow" data-reveal>Projects</p>
+        <h2 class="section-title" id="projects-title" data-reveal>Things I've built.</h2>
+        <p class="section-sub" data-reveal>Hardware, software, and everything in between. Click any project for the full story.</p>
+
+        <div class="project-grid" id="project-grid" aria-live="polite">
+          <p class="project-status">Loading projects…</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 4. RESUME ============ -->
+    <section class="section resume" id="resume" aria-labelledby="resume-title">
+      <div class="container resume-inner">
+        <p class="section-eyebrow" data-reveal>Resume</p>
+        <h2 class="section-title" id="resume-title" data-reveal>The short version.</h2>
+        <p class="section-sub" data-reveal>Experience, coursework, and skills — all on one page.</p>
+        <div class="resume-actions" data-reveal>
+          <!-- ✏️ EDIT: replace assets/docs/resume.pdf with your own (same name = no code changes) -->
+          <a class="btn btn-primary btn-lg" href="assets/docs/resume.pdf" target="_blank" rel="noopener">View Resume</a>
+          <a class="btn btn-secondary btn-lg" href="assets/docs/resume.pdf" download="YourName-Resume.pdf">Download PDF</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 5. CONTACT ============ -->
+    <section class="section section-alt" id="contact" aria-labelledby="contact-title">
+      <div class="container contact-grid">
+        <div class="contact-intro">
+          <p class="section-eyebrow" data-reveal>Contact</p>
+          <h2 class="section-title" id="contact-title" data-reveal>Let's build something.</h2>
+          <p class="section-sub" data-reveal>I'm open to internships, full-time roles, and research collaborations. The fastest way to reach me is email.</p>
+
+          <!-- ✏️ EDIT: your email, LinkedIn, and GitHub -->
+          <ul class="contact-links" data-reveal>
+            <li>
+              <a href="mailto:you@northeastern.edu">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M3 6.5A1.5 1.5 0 0 1 4.5 5h15A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-11Zm0 .5 9 6 9-6"/></svg>
+                <span><strong>Email</strong>you@northeastern.edu</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.linkedin.com/in/YOUR-USERNAME" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z"/></svg>
+                <span><strong>LinkedIn</strong>linkedin.com/in/YOUR-USERNAME</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/YOUR-USERNAME" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.4-5.27 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
+                <span><strong>GitHub</strong>github.com/YOUR-USERNAME</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- ✏️ EDIT: replace YOUR_FORM_ID with your Formspree form ID (see README → "Contact form") -->
+        <form class="contact-form" id="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST" data-reveal>
+          <div class="field">
+            <label for="cf-name">Name</label>
+            <input id="cf-name" name="name" type="text" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="cf-email">Email</label>
+            <input id="cf-email" name="email" type="email" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="cf-message">Message</label>
+            <textarea id="cf-message" name="message" rows="5" required></textarea>
+          </div>
+          <!-- Spam trap: humans never see or fill this -->
+          <input type="text" name="_gotcha" class="visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button class="btn btn-primary btn-block" type="submit">Send message</button>
+          <p class="form-status" id="form-status" role="status"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <!-- ✏️ EDIT: your name -->
+      <p>© <span id="year"></span> Your Name. Built in Boston.</p>
+      <a href="#home">Back to top ↑</a>
+    </div>
+  </footer>
+
+  <!-- ============ PROJECT DETAIL MODAL (filled in by js/main.js) ============ -->
+  <dialog class="modal" id="project-modal" aria-labelledby="modal-title">
+    <button class="modal-close" id="modal-close" aria-label="Close project details">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="modal-body" id="modal-body"></div>
+  </dialog>
+</body>
+</html>

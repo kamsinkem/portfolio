@@ -1,0 +1,103 @@
+[
+  {
+    "id": "robotic-arm",
+    "title": "6-DOF Robotic Arm with Visual Servoing",
+    "year": "2025",
+    "summary": "A desktop 6-axis arm designed from scratch in SolidWorks, driven by ROS 2 and MoveIt, that picks objects using closed-loop camera feedback.",
+    "cover": "assets/projects/robotic-arm/cover.svg",
+    "tools": ["ROS 2", "MoveIt", "C++", "Python", "SolidWorks", "Arduino"],
+    "links": {
+      "github": "https://github.com/YOUR-USERNAME/robotic-arm",
+      "video": "https://www.youtube.com/watch?v=YOUR-VIDEO-ID",
+      "report": "assets/docs/robotic-arm-report.pdf"
+    },
+    "gallery": [
+      { "src": "assets/projects/robotic-arm/cover.svg", "caption": "The finished arm on the bench." },
+      { "src": "assets/projects/robotic-arm/cad.svg", "caption": "Full assembly in SolidWorks — 3D-printed links with aluminum joints." },
+      { "src": "assets/projects/robotic-arm/assembly.svg", "caption": "Wiring the servo bus and motor drivers." },
+      { "src": "assets/projects/robotic-arm/testing.svg", "caption": "Pick-and-place trials with visual servoing." }
+    ],
+    "details": [
+      "## Overview",
+      "Placeholder writeup. Describe the problem you set out to solve, why it mattered, and what the final system does. Two or three sentences is plenty here.",
+      "## What I built",
+      [
+        "Designed all links and joints in SolidWorks and 3D-printed them in PETG.",
+        "Wrote a custom ROS 2 hardware interface in C++ for the servo bus.",
+        "Configured MoveIt for motion planning with collision checking.",
+        "Implemented image-based visual servoing using an eye-in-hand camera."
+      ],
+      "## Results",
+      "Placeholder results. Share a number if you have one — for example, a 92% pick success rate over 50 trials, with ±2 mm repeatability.",
+      "## What I learned",
+      "Placeholder reflection. What surprised you, what would you do differently next time?"
+    ]
+  },
+  {
+    "id": "autonomous-mobile-robot",
+    "title": "Autonomous Mobile Robot for Indoor Navigation",
+    "year": "2025",
+    "summary": "A differential-drive robot that maps unknown buildings with LiDAR SLAM and navigates to goals while avoiding people and obstacles.",
+    "cover": "assets/projects/autonomous-mobile-robot/cover.svg",
+    "tools": ["ROS 2", "Nav2", "SLAM Toolbox", "C++", "Python", "Gazebo", "LiDAR"],
+    "links": {
+      "github": "https://github.com/YOUR-USERNAME/autonomous-mobile-robot",
+      "video": "https://www.youtube.com/watch?v=YOUR-VIDEO-ID",
+      "report": "assets/docs/autonomous-mobile-robot-report.pdf"
+    },
+    "gallery": [
+      { "src": "assets/projects/autonomous-mobile-robot/cover.svg", "caption": "The robot in the hallway outside the lab." },
+      { "src": "assets/projects/autonomous-mobile-robot/slam-map.svg", "caption": "Occupancy grid of the building's 2nd floor built with SLAM Toolbox." },
+      { "src": "assets/projects/autonomous-mobile-robot/hardware.svg", "caption": "Onboard compute, LiDAR, and IMU layout." },
+      { "src": "assets/projects/autonomous-mobile-robot/field-test.svg", "caption": "Field test: navigating a crowded atrium." }
+    ],
+    "details": [
+      "## Overview",
+      "Placeholder writeup. Explain the goal — for example, an indoor delivery robot that can operate in a building it has never seen before.",
+      "## System architecture",
+      [
+        "2D LiDAR + wheel odometry + IMU fused with an EKF (robot_localization).",
+        "SLAM Toolbox for mapping; AMCL for localization on saved maps.",
+        "Nav2 with a custom costmap layer for dynamic obstacles.",
+        "Simulated end-to-end in Gazebo before every hardware test."
+      ],
+      "## Results",
+      "Placeholder results. For example: reached 47 of 50 goals across three floors with an average speed of 0.6 m/s.",
+      "## What I learned",
+      "Placeholder reflection on sim-to-real, sensor calibration, or tuning."
+    ]
+  },
+  {
+    "id": "vision-pose-estimation",
+    "title": "Real-Time Object Detection & 6D Pose Estimation",
+    "year": "2024",
+    "summary": "A perception pipeline that detects household objects and estimates their full 3D position and orientation at 30 FPS from an RGB-D camera.",
+    "cover": "assets/projects/vision-pose-estimation/cover.svg",
+    "tools": ["Python", "PyTorch", "OpenCV", "YOLO", "Open3D", "Intel RealSense"],
+    "links": {
+      "github": "https://github.com/YOUR-USERNAME/vision-pose-estimation",
+      "video": "",
+      "report": "assets/docs/vision-pose-estimation-report.pdf"
+    },
+    "gallery": [
+      { "src": "assets/projects/vision-pose-estimation/cover.svg", "caption": "Live detections overlaid on the RGB stream." },
+      { "src": "assets/projects/vision-pose-estimation/detections.svg", "caption": "Bounding boxes and confidence scores on a cluttered table." },
+      { "src": "assets/projects/vision-pose-estimation/pipeline.svg", "caption": "Pipeline: detection → segmentation → point-cloud registration." },
+      { "src": "assets/projects/vision-pose-estimation/demo.svg", "caption": "Estimated poses handed off to the robot arm for grasping." }
+    ],
+    "details": [
+      "## Overview",
+      "Placeholder writeup. Describe the perception problem and where it fits in a larger robot system.",
+      "## Approach",
+      [
+        "Fine-tuned a YOLO model on a custom dataset of 2,000 labeled images.",
+        "Cropped depth by each detection and refined pose with ICP in Open3D.",
+        "Optimized the pipeline with TensorRT to run at 30 FPS on a Jetson."
+      ],
+      "## Results",
+      "Placeholder results. For example: 0.87 mAP@0.5 and a mean rotation error under 8°.",
+      "## What I learned",
+      "Placeholder reflection."
+    ]
+  }
+]

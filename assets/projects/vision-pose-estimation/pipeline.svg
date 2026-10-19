@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5a2a1d"/><stop offset="1" stop-color="#120806"/>
+    </linearGradient>
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" stroke="#fff" stroke-opacity=".07" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#g)"/>
+  <rect width="1600" height="1000" fill="url(#grid)"/>
+  <g fill="none" stroke-width="6.0">
+  <rect x="288.0" y="200.0" width="416.0" height="420.0" rx="8.0" stroke="#5ef0c0"/>
+  <rect x="288.0" y="166.0" width="120.0" height="34.0" fill="#5ef0c0"/>
+  <rect x="832.0" y="300.0" width="480.0" height="360.0" rx="8.0" stroke="#ffd166"/>
+  <rect x="832.0" y="266.0" width="120.0" height="34.0" fill="#ffd166"/>
+  <rect x="576.0" y="580.0" width="256.0" height="200.0" rx="8.0" stroke="#7cc4ff"/>
+  <rect x="576.0" y="546.0" width="120.0" height="34.0" fill="#7cc4ff"/>
+  </g>
+  <text x="800.0" y="930.0" text-anchor="middle" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="29" font-weight="600" fill="#fff" fill-opacity=".55" letter-spacing="1">vision-pose-estimation/pipeline — replace me</text>
+</svg>
