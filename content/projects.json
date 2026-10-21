@@ -1,103 +1,158 @@
 [
   {
-    "id": "robotic-arm",
-    "title": "6-DOF Robotic Arm with Visual Servoing",
-    "year": "2025",
-    "summary": "A desktop 6-axis arm designed from scratch in SolidWorks, driven by ROS 2 and MoveIt, that picks objects using closed-loop camera feedback.",
-    "cover": "assets/projects/robotic-arm/cover.svg",
-    "tools": ["ROS 2", "MoveIt", "C++", "Python", "SolidWorks", "Arduino"],
+    "id": "blind-spot-radar",
+    "title": "Blind Spot Detection with FMCW Radar and ADALM Pluto SDR",
+    "category": "Final Year Capstone Project",
+    "dates": "Sept 2024 – June 2025",
+    "featured": true,
+    "summary": "A proof-of-concept FMCW radar built on the ADALM Pluto software-defined radio that detects multiple objects and estimates how far away each one is — the core sensing behind vehicle blind-spot detection.",
+    "cover": "assets/projects/blind-spot-radar/cover.svg",
+    "coverCaption": "The radar test setup.",
+    "tools": ["MATLAB", "ADALM Pluto SDR", "Signal Processing", "FMCW Radar", "Wireless Systems"],
+    "skills": ["Signal processing", "SDR systems", "MATLAB development", "Experimental testing", "Hardware–software integration", "Problem solving"],
     "links": {
-      "github": "https://github.com/YOUR-USERNAME/robotic-arm",
-      "video": "https://www.youtube.com/watch?v=YOUR-VIDEO-ID",
-      "report": "assets/docs/robotic-arm-report.pdf"
-    },
-    "gallery": [
-      { "src": "assets/projects/robotic-arm/cover.svg", "caption": "The finished arm on the bench." },
-      { "src": "assets/projects/robotic-arm/cad.svg", "caption": "Full assembly in SolidWorks — 3D-printed links with aluminum joints." },
-      { "src": "assets/projects/robotic-arm/assembly.svg", "caption": "Wiring the servo bus and motor drivers." },
-      { "src": "assets/projects/robotic-arm/testing.svg", "caption": "Pick-and-place trials with visual servoing." }
-    ],
-    "details": [
-      "## Overview",
-      "Placeholder writeup. Describe the problem you set out to solve, why it mattered, and what the final system does. Two or three sentences is plenty here.",
-      "## What I built",
-      [
-        "Designed all links and joints in SolidWorks and 3D-printed them in PETG.",
-        "Wrote a custom ROS 2 hardware interface in C++ for the servo bus.",
-        "Configured MoveIt for motion planning with collision checking.",
-        "Implemented image-based visual servoing using an eye-in-hand camera."
-      ],
-      "## Results",
-      "Placeholder results. Share a number if you have one — for example, a 92% pick success rate over 50 trials, with ±2 mm repeatability.",
-      "## What I learned",
-      "Placeholder reflection. What surprised you, what would you do differently next time?"
-    ]
-  },
-  {
-    "id": "autonomous-mobile-robot",
-    "title": "Autonomous Mobile Robot for Indoor Navigation",
-    "year": "2025",
-    "summary": "A differential-drive robot that maps unknown buildings with LiDAR SLAM and navigates to goals while avoiding people and obstacles.",
-    "cover": "assets/projects/autonomous-mobile-robot/cover.svg",
-    "tools": ["ROS 2", "Nav2", "SLAM Toolbox", "C++", "Python", "Gazebo", "LiDAR"],
-    "links": {
-      "github": "https://github.com/YOUR-USERNAME/autonomous-mobile-robot",
-      "video": "https://www.youtube.com/watch?v=YOUR-VIDEO-ID",
-      "report": "assets/docs/autonomous-mobile-robot-report.pdf"
-    },
-    "gallery": [
-      { "src": "assets/projects/autonomous-mobile-robot/cover.svg", "caption": "The robot in the hallway outside the lab." },
-      { "src": "assets/projects/autonomous-mobile-robot/slam-map.svg", "caption": "Occupancy grid of the building's 2nd floor built with SLAM Toolbox." },
-      { "src": "assets/projects/autonomous-mobile-robot/hardware.svg", "caption": "Onboard compute, LiDAR, and IMU layout." },
-      { "src": "assets/projects/autonomous-mobile-robot/field-test.svg", "caption": "Field test: navigating a crowded atrium." }
-    ],
-    "details": [
-      "## Overview",
-      "Placeholder writeup. Explain the goal — for example, an indoor delivery robot that can operate in a building it has never seen before.",
-      "## System architecture",
-      [
-        "2D LiDAR + wheel odometry + IMU fused with an EKF (robot_localization).",
-        "SLAM Toolbox for mapping; AMCL for localization on saved maps.",
-        "Nav2 with a custom costmap layer for dynamic obstacles.",
-        "Simulated end-to-end in Gazebo before every hardware test."
-      ],
-      "## Results",
-      "Placeholder results. For example: reached 47 of 50 goals across three floors with an average speed of 0.6 m/s.",
-      "## What I learned",
-      "Placeholder reflection on sim-to-real, sensor calibration, or tuning."
-    ]
-  },
-  {
-    "id": "vision-pose-estimation",
-    "title": "Real-Time Object Detection & 6D Pose Estimation",
-    "year": "2024",
-    "summary": "A perception pipeline that detects household objects and estimates their full 3D position and orientation at 30 FPS from an RGB-D camera.",
-    "cover": "assets/projects/vision-pose-estimation/cover.svg",
-    "tools": ["Python", "PyTorch", "OpenCV", "YOLO", "Open3D", "Intel RealSense"],
-    "links": {
-      "github": "https://github.com/YOUR-USERNAME/vision-pose-estimation",
+      "github": "",
       "video": "",
-      "report": "assets/docs/vision-pose-estimation-report.pdf"
+      "report": ""
     },
-    "gallery": [
-      { "src": "assets/projects/vision-pose-estimation/cover.svg", "caption": "Live detections overlaid on the RGB stream." },
-      { "src": "assets/projects/vision-pose-estimation/detections.svg", "caption": "Bounding boxes and confidence scores on a cluttered table." },
-      { "src": "assets/projects/vision-pose-estimation/pipeline.svg", "caption": "Pipeline: detection → segmentation → point-cloud registration." },
-      { "src": "assets/projects/vision-pose-estimation/demo.svg", "caption": "Estimated poses handed off to the robot arm for grasping." }
+    "overview": "Blind-spot detection systems warn drivers about vehicles they can't see in their mirrors. For my final-year capstone, I built a proof-of-concept of the sensing side of that problem: an FMCW radar on low-cost ADALM Pluto SDR hardware that detects multiple objects in a controlled environment and estimates the distance to each one.",
+    "sections": [
+      {
+        "heading": "How FMCW radar measures distance",
+        "text": [
+          "An FMCW (frequency-modulated continuous-wave) radar transmits a “chirp” — a signal whose frequency sweeps steadily over time. When the chirp reflects off an object and comes back, it arrives slightly late, so at any instant the received signal is at a different frequency from the one being sent.",
+          "That frequency difference grows with the object's distance. Measuring it turns a timing problem into a frequency problem, which is much easier to solve with signal processing."
+        ],
+        "image": { "src": "assets/projects/blind-spot-radar/chirp-diagram.svg", "caption": "Transmitted vs. received chirp — the gap between them reveals distance." }
+      },
+      {
+        "heading": "Building it on the ADALM Pluto SDR",
+        "text": "The ADALM Pluto is a small, affordable software-defined radio. I used it as the radar's transmitter and receiver, with the signal generation and processing written in MATLAB.",
+        "bullets": [
+          "Developed a proof-of-concept FMCW radar detection system on ADALM Pluto SDR hardware.",
+          "Implemented distance estimation algorithms by analyzing the frequency difference between transmitted and received signals.",
+          "Applied signal processing techniques to extract meaningful data from the received radar signals."
+        ],
+        "image": { "src": "assets/projects/blind-spot-radar/hardware.svg", "caption": "ADALM Pluto SDR and antenna setup." }
+      },
+      {
+        "heading": "Testing in a controlled environment",
+        "text": "To understand how well the system really works, I designed and ran controlled experiments that evaluated:",
+        "bullets": [
+          "Accuracy: how close the estimated distances are to the true distances.",
+          "Resolution: how close together two objects can be and still be told apart.",
+          "Multi-object detection: detecting and ranging several objects at once.",
+          "Material sensitivity: how different materials affect the reflected signal."
+        ],
+        "image": { "src": "assets/projects/blind-spot-radar/test-environment.svg", "caption": "Controlled test environment with target objects." }
+      },
+      {
+        "heading": "Results",
+        "text": "✏️ Placeholder — add your results here: for example, measured distance error, the closest object spacing the radar could resolve, and a plot of the range spectrum showing each detected object as a peak.",
+        "image": { "src": "assets/projects/blind-spot-radar/results.svg", "caption": "Range spectrum with detected objects." }
+      }
     ],
-    "details": [
-      "## Overview",
-      "Placeholder writeup. Describe the perception problem and where it fits in a larger robot system.",
-      "## Approach",
-      [
-        "Fine-tuned a YOLO model on a custom dataset of 2,000 labeled images.",
-        "Cropped depth by each detection and refined pose with ICP in Open3D.",
-        "Optimized the pipeline with TensorRT to run at 30 FPS on a Jetson."
-      ],
-      "## Results",
-      "Placeholder results. For example: 0.87 mAP@0.5 and a mean rotation error under 8°.",
-      "## What I learned",
-      "Placeholder reflection."
+    "gallery": [
+      { "src": "assets/projects/blind-spot-radar/gallery-1.svg", "caption": "MATLAB processing pipeline." },
+      { "src": "assets/projects/blind-spot-radar/gallery-2.svg", "caption": "Running a multi-object test." },
+      { "src": "assets/projects/blind-spot-radar/gallery-3.svg", "caption": "Capstone presentation day." }
+    ]
+  },
+  {
+    "id": "smart-irrigation",
+    "title": "Smart Irrigation System",
+    "category": "Community-Based Project",
+    "dates": "Feb 2024 – Present",
+    "featured": true,
+    "summary": "An automated irrigation prototype that adjusts watering based on soil moisture and humidity — shaped by interviews with 15 farmers and agricultural experts.",
+    "cover": "assets/projects/smart-irrigation/cover.svg",
+    "coverCaption": "The smart irrigation prototype.",
+    "tools": ["Microcontrollers", "Sensors", "Embedded Systems", "IoT Concepts"],
+    "skills": ["Embedded systems", "Hardware integration", "Requirements gathering", "Research", "Prototyping", "Teamwork"],
+    "links": {
+      "github": "",
+      "video": "",
+      "report": ""
+    },
+    "overview": "Watering on a fixed schedule wastes water when the soil is already moist and falls short when conditions change. This community-based project makes irrigation respond to what the field actually needs: a prototype that reads soil moisture and humidity and adjusts watering automatically, designed to improve water efficiency and automation in agriculture.",
+    "sections": [
+      {
+        "heading": "Starting with the people who'd use it",
+        "text": "Before choosing any hardware, I conducted user research with 15 farmers and agricultural experts to understand the real-world irrigation challenges they face and what a useful system would need to do. Those conversations shaped the system's requirements.",
+        "image": { "src": "assets/projects/smart-irrigation/research.svg", "caption": "Talking with farmers about their irrigation challenges." }
+      },
+      {
+        "heading": "Designing the system",
+        "bullets": [
+          "Integrated sensors, microcontrollers, and actuators into an automated irrigation control system.",
+          "Researched and selected appropriate electronic components and communication protocols for reliable operation.",
+          "Designed the system to adjust watering automatically based on soil moisture and humidity levels."
+        ],
+        "image": { "src": "assets/projects/smart-irrigation/block-diagram.svg", "caption": "System block diagram: sensors → microcontroller → actuators." }
+      },
+      {
+        "heading": "The prototype",
+        "text": "The working prototype brings sensing, control, and actuation together in one automated system that waters only when the readings show it's needed.",
+        "image": { "src": "assets/projects/smart-irrigation/prototype.svg", "caption": "The working prototype." }
+      },
+      {
+        "heading": "Results & next steps",
+        "text": "✏️ Placeholder — add what you've learned so far, any field-test results (for example, water saved compared with manual watering), and what's next for the project."
+      }
+    ],
+    "gallery": [
+      { "src": "assets/projects/smart-irrigation/gallery-1.svg", "caption": "Soil-moisture sensor in the field." },
+      { "src": "assets/projects/smart-irrigation/gallery-2.svg", "caption": "Electronics close-up." },
+      { "src": "assets/projects/smart-irrigation/gallery-3.svg", "caption": "The project team." }
+    ]
+  },
+  {
+    "id": "ev-solar-dc-dc-converter",
+    "title": "DC–DC Converter for EV Solar Charging Station",
+    "category": "Power Electronics Project",
+    "dates": "Jan 2023 – May 2023",
+    "role": "Team lead · 6 students",
+    "featured": true,
+    "summary": "Led a team of six to design and simulate a DC–DC converter for a solar-powered EV charging station concept — from business plan to circuit simulation.",
+    "cover": "assets/projects/ev-solar-dc-dc-converter/cover.svg",
+    "coverCaption": "EV solar charging station concept.",
+    "tools": ["MATLAB", "LTSpice", "Power Electronics", "Circuit Simulation"],
+    "skills": ["Leadership", "Power electronics design", "Circuit simulation", "Technical documentation", "Teamwork"],
+    "links": {
+      "github": "",
+      "video": "",
+      "report": ""
+    },
+    "overview": "A solar charging station has to turn the power coming from its panels into the voltage an electric vehicle needs. A DC–DC converter does that job. I led a team of six students to design one for an EV solar charging station concept, covering both the engineering and the business case.",
+    "sections": [
+      {
+        "heading": "Leading the team",
+        "text": "As team lead, I contributed to both the technical design and project management, coordinating six people across engineering, documentation, and business work.",
+        "bullets": [
+          "Developed a business plan and a product concept report.",
+          "Wrote the technical specifications for the converter."
+        ],
+        "image": { "src": "assets/projects/ev-solar-dc-dc-converter/team.svg", "caption": "The project team." }
+      },
+      {
+        "heading": "Design & simulation",
+        "text": "We designed the converter circuit and simulated it in MATLAB and LTSpice to check how it behaves before any hardware is built.",
+        "image": { "src": "assets/projects/ev-solar-dc-dc-converter/schematic.svg", "caption": "Converter schematic in LTSpice." }
+      },
+      {
+        "heading": "Efficiency & power quality",
+        "text": "Using the simulation results, we performed efficiency and power-quality analysis on the system.",
+        "image": { "src": "assets/projects/ev-solar-dc-dc-converter/analysis.svg", "caption": "Simulated waveforms and efficiency analysis." }
+      },
+      {
+        "heading": "Results",
+        "text": "✏️ Placeholder — add your key numbers here, such as input/output voltage, rated power, and simulated efficiency."
+      }
+    ],
+    "gallery": [
+      { "src": "assets/projects/ev-solar-dc-dc-converter/gallery-1.svg", "caption": "MATLAB model." },
+      { "src": "assets/projects/ev-solar-dc-dc-converter/gallery-2.svg", "caption": "Charging station concept sketch." },
+      { "src": "assets/projects/ev-solar-dc-dc-converter/gallery-3.svg", "caption": "Product concept report." }
     ]
   }
 ]

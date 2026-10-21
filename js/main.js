@@ -1,8 +1,11 @@
 /* =========================================================
-   Portfolio behavior
-   - Builds project cards from content/projects.json
-   - Project detail modal with photo gallery
-   - Nav: active-section highlight + mobile menu
+   Portfolio behavior (shared by every page)
+   - Reads all project data from content/projects.json and builds:
+       · the "Projects" dropdown in the nav
+       · the home-page project carousel   (index.html)
+       · the all-projects grid             (projects.html)
+       · each project's detail page        (project.html?id=…)
+   - Nav: active-section highlight, dark-over-hero, mobile menu
    - GSAP/ScrollTrigger animations (skipped for reduced motion)
    - Formspree contact form
    You shouldn't need to edit this file to update content.
@@ -13,6 +16,7 @@
   const PROJECTS_URL = 'content/projects.json';
 
   const root = document.documentElement;
+  const page = document.body.dataset.page || 'home';
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const hasGsap = typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined';
   const animate = !reduceMotion && hasGsap;
@@ -44,11 +48,34 @@
     github: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.4-5.27 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>',
     video: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.8"/><path fill="currentColor" d="M10 8.5v7l6-3.5-6-3.5Z"/></svg>',
     report: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M14 3v5h5M9 13h6M9 17h6"/></svg>',
-    prev: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="m15 5-7 7 7 7"/></svg>',
-    next: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7"/></svg>'
+    arrow: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></svg>'
   };
 
   const LINK_LABELS = { github: 'Code', video: 'Video', report: 'Report (PDF)' };
+
+  /* ---------------- Project data ---------------- */
+  let projectsPromise = null;
+
+  function getProjects() {
+    projectsPromise = projectsPromise || fetch(PROJECTS_URL, { cache: 'no-cache' })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((list) => {
+        if (!Array.isArray(list)) throw new Error('projects.json must contain a list [ … ]');
+        return list;
+      });
+    return projectsPromise;
+  }
+
+  const projectUrl = (p) => `project.html?id=${encodeURIComponent(p.id)}`;
+
+  function loadErrorMessage() {
+    return location.protocol === 'file:'
+      ? 'Projects can’t load when the page is opened as a file. Preview it with a local server — see README → “Preview on your computer”.'
+      : 'Couldn’t load projects. Check content/projects.json for a typo (a missing comma or quote is the usual culprit).';
+  }
 
   /* ---------------- Navigation ---------------- */
   function initNav() {
@@ -62,244 +89,325 @@
       toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
     };
     toggle.addEventListener('click', () => setMenu(!header.classList.contains('nav-open')));
-    $$('.nav-links a').forEach((a) => a.addEventListener('click', () => setMenu(false)));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+    header.addEventListener('click', (e) => { if (e.target.closest('.nav-links a')) setMenu(false); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      setMenu(false);
+      // Close the Projects dropdown if focus is inside it
+      if (document.activeElement && document.activeElement.closest('.has-dropdown')) document.activeElement.blur();
+    });
 
-    // Switch the nav to dark colors while it sits over the dark hero.
-    const hero = $('.hero');
-    if (hero) {
-      const updateNavTone = () => header.classList.toggle('on-dark', hero.getBoundingClientRect().bottom > header.offsetHeight);
+    // Switch the nav to dark colors while it sits over a dark header (home hero or page header).
+    const darkTop = $('.hero, .page-hero');
+    if (darkTop) {
+      const updateNavTone = () => header.classList.toggle('on-dark', darkTop.getBoundingClientRect().bottom > header.offsetHeight);
       window.addEventListener('scroll', updateNavTone, { passive: true });
       window.addEventListener('resize', updateNavTone);
       updateNavTone();
     }
 
-    // Highlight the nav link of whichever section crosses the middle of the screen.
-    const sections = $$('main > section[id]');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        const id = entry.target.id;
-        navLinks.forEach((a) => {
-          const active = a.dataset.nav === id;
-          a.classList.toggle('is-active', active);
-          if (active) a.setAttribute('aria-current', 'true');
-          else a.removeAttribute('aria-current');
-        });
-      });
-    }, { rootMargin: '-50% 0px -50% 0px' });
-    sections.forEach((s) => observer.observe(s));
-  }
+    const setActive = (id) => navLinks.forEach((a) => {
+      const active = a.dataset.nav === id;
+      a.classList.toggle('is-active', active);
+      if (active) a.setAttribute('aria-current', 'true');
+      else a.removeAttribute('aria-current');
+    });
 
-  /* ---------------- Projects ---------------- */
-  let projects = [];
-
-  async function loadProjects() {
-    const grid = $('#project-grid');
-    try {
-      const res = await fetch(PROJECTS_URL, { cache: 'no-cache' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      projects = await res.json();
-      if (!Array.isArray(projects)) throw new Error('projects.json must contain a list [ … ]');
-    } catch (err) {
-      console.error('Could not load projects:', err);
-      const msg = location.protocol === 'file:'
-        ? 'Projects can’t load when the page is opened as a file. Preview it with a local server — see README → “Preview on your computer”.'
-        : 'Couldn’t load projects. Check content/projects.json for a typo (a missing comma or quote is the usual culprit).';
-      grid.replaceChildren(el('p', { class: 'project-status', text: msg }));
+    if (page !== 'home') {
+      setActive('projects');
       return;
     }
 
-    grid.replaceChildren(...projects.map(renderCard));
-    animateCards();
-    openFromHash();
+    // Home: highlight the link of whichever section crosses the middle of the screen.
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => { if (entry.isIntersecting) setActive(entry.target.id); });
+    }, { rootMargin: '-50% 0px -50% 0px' });
+    $$('main > section[id]').forEach((s) => observer.observe(s));
+  }
+
+  // Fills the "Projects" hover dropdown with every project in projects.json.
+  function buildNavDropdown(projects) {
+    const list = $('[data-project-menu]');
+    if (!list) return;
+    list.replaceChildren(...projects.map((p) => el('li', {}, [
+      el('a', { href: projectUrl(p) }, [
+        el('img', { src: p.cover, alt: '', loading: 'lazy', width: 64, height: 44 }),
+        el('span', { class: 'dd-text' }, [
+          el('strong', { text: p.title }),
+          p.category ? el('small', { text: p.category }) : null
+        ])
+      ])
+    ])));
+  }
+
+  /* ---------------- Shared pieces ---------------- */
+  function renderTools(tools = [], className = 'tools') {
+    if (!tools.length) return null;
+    return el('ul', { class: className, 'aria-label': 'Tools used' }, tools.map((t) => el('li', { text: t })));
   }
 
   function renderLinks(links = {}) {
     const items = Object.keys(LINK_LABELS)
       .filter((key) => links[key])
       .map((key) => {
-        const a = el('a', { href: links[key], target: '_blank', rel: 'noopener' });
-        a.innerHTML = ICONS[key];
+        const a = el('a', { href: links[key], target: '_blank', rel: 'noopener', html: ICONS[key] });
         a.append(LINK_LABELS[key]);
         return a;
       });
     return items.length ? el('div', { class: 'links' }, items) : null;
   }
 
-  function renderTools(tools = []) {
-    if (!tools.length) return null;
-    return el('ul', { class: 'tools', 'aria-label': 'Tools used' }, tools.map((t) => el('li', { text: t })));
-  }
+  const metaLine = (p) => [p.category, p.dates].filter(Boolean).join(' · ');
 
-  function renderCard(p) {
-    const media = el('div', { class: 'card-media' }, [
-      el('img', { src: p.cover, alt: '', loading: 'lazy', width: 1600, height: 1000 })
+  function renderCard(p, ctaLabel) {
+    const href = projectUrl(p);
+    const cta = el('a', { class: 'btn btn-primary btn-sm card-cta', href, html: ICONS.arrow });
+    cta.prepend(ctaLabel + ' ');
+    cta.setAttribute('aria-label', `${ctaLabel}: ${p.title}`);
+
+    return el('article', { class: 'project-card', 'data-card': '' }, [
+      el('a', { class: 'card-media', href, tabindex: '-1', 'aria-hidden': 'true' }, [
+        el('img', { src: p.cover, alt: '', loading: 'lazy', width: 1600, height: 1000 })
+      ]),
+      el('div', { class: 'card-body' }, [
+        metaLine(p) ? el('p', { class: 'card-meta', text: metaLine(p) }) : null,
+        el('h3', { class: 'card-title' }, [el('a', { href, text: p.title })]),
+        el('p', { class: 'card-summary', text: p.summary }),
+        renderTools(p.tools),
+        cta
+      ])
     ]);
-    const openBtn = el('button', { class: 'card-open', type: 'button', 'aria-label': `Open details for ${p.title}` });
-    openBtn.addEventListener('click', () => openProject(p.id));
+  }
 
-    const title = el('h3', { class: 'card-title' }, [openBtn, document.createTextNode(p.title)]);
-    const body = el('div', { class: 'card-body' }, [
-      p.year ? el('p', { class: 'card-meta', text: p.year }) : null,
-      title,
-      el('p', { class: 'card-summary', text: p.summary }),
-      renderTools(p.tools),
-      renderLinks(p.links)
+  function showError(container) {
+    container.replaceChildren(el('p', { class: 'project-status', text: loadErrorMessage() }));
+  }
+
+  /* ---------------- Home page: project carousel ---------------- */
+  function initHomeProjects(projects) {
+    const track = $('#project-carousel');
+    if (!track) return;
+    const featured = projects.filter((p) => p.featured);
+    const list = featured.length ? featured : projects.slice(0, 3);
+
+    const more = el('a', { class: 'project-card more-card', href: 'projects.html', 'data-card': '' }, [
+      el('span', { class: 'more-arrow', html: ICONS.arrow }),
+      el('h3', { class: 'card-title', text: 'Browse all projects' }),
+      el('p', { class: 'card-summary', text: `See all ${projects.length} projects, each with a full write-up.` })
     ]);
-    return el('article', { class: 'project-card', 'data-id': p.id }, [media, body]);
+
+    track.replaceChildren(...list.map((p) => renderCard(p, 'View Project')), more);
+    initCarousel(track);
+    revealCards(track);
   }
 
-  /* ---------------- Project modal ---------------- */
-  const modal = $('#project-modal');
-  const modalBody = $('#modal-body');
-  let lastFocus = null;
+  function initCarousel(track) {
+    const prev = $('#proj-prev');
+    const next = $('#proj-next');
+    if (!prev || !next) return;
 
-  function renderDetails(details = []) {
-    // Each entry in "details" can be:
-    //   "A paragraph of text"
-    //   "## A heading"
-    //   ["bullet one", "bullet two"]
-    return el('div', { class: 'modal-details' }, details.map((block) => {
-      if (Array.isArray(block)) return el('ul', {}, block.map((item) => el('li', { text: item })));
-      if (typeof block === 'string' && block.startsWith('## ')) return el('h3', { text: block.slice(3) });
-      return el('p', { text: String(block) });
-    }));
+    const step = () => {
+      const card = track.querySelector('.project-card');
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      return card ? card.offsetWidth + gap : track.clientWidth * 0.8;
+    };
+    const go = (dir) => track.scrollBy({ left: dir * step(), behavior: reduceMotion ? 'auto' : 'smooth' });
+    prev.addEventListener('click', () => go(-1));
+    next.addEventListener('click', () => go(1));
+
+    const update = () => {
+      const max = track.scrollWidth - track.clientWidth - 4;
+      prev.disabled = track.scrollLeft <= 4;
+      next.disabled = track.scrollLeft >= max;
+    };
+    track.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
   }
 
-  function renderGallery(p) {
-    const images = (p.gallery && p.gallery.length) ? p.gallery : [{ src: p.cover, caption: '' }];
-    let index = 0;
+  /* ---------------- Projects page: grid of all projects ---------------- */
+  function initProjectsPage(projects) {
+    const grid = $('#all-projects');
+    grid.replaceChildren(...projects.map((p) => renderCard(p, 'See More')));
+    const count = $('#project-count');
+    if (count) count.textContent = `${projects.length} project${projects.length === 1 ? '' : 's'}`;
+    revealCards(grid);
+  }
 
-    const mainImg = el('img', { src: images[0].src, alt: images[0].caption || p.title });
-    const caption = el('p', { class: 'gallery-caption', text: images[0].caption || '' });
-    const main = el('div', { class: 'gallery-main' }, [mainImg]);
+  /* ---------------- Project detail page ---------------- */
+  function renderBullet(text) {
+    // "Label: rest of the sentence" → bold label
+    const m = /^([^:]{1,40}):\s(.+)$/.exec(text);
+    return m ? el('li', {}, [el('strong', { text: m[1] + ': ' }), m[2]]) : el('li', { text });
+  }
 
-    const thumbs = images.map((img, i) => {
-      const b = el('button', { type: 'button', 'aria-label': `Show image ${i + 1} of ${images.length}`, 'aria-current': i === 0 ? 'true' : 'false' },
-        [el('img', { src: img.src, alt: '', loading: 'lazy' })]);
-      b.addEventListener('click', () => show(i));
-      return b;
-    });
+  function renderFigure(img, className) {
+    if (!img || !img.src) return null;
+    return el('figure', { class: className, 'data-reveal': '' }, [
+      el('div', { class: 'figure-frame' }, [el('img', { src: img.src, alt: img.caption || '', loading: 'lazy' })]),
+      img.caption ? el('figcaption', { text: img.caption }) : null
+    ]);
+  }
 
-    function show(i) {
-      index = (i + images.length) % images.length;
-      const img = images[index];
-      const swap = () => {
-        mainImg.src = img.src;
-        mainImg.alt = img.caption || p.title;
-        caption.textContent = img.caption || '';
-      };
-      if (animate) {
-        gsap.to(mainImg, { opacity: 0, duration: 0.15, onComplete: () => { swap(); gsap.to(mainImg, { opacity: 1, duration: 0.3 }); } });
-      } else {
-        swap();
-      }
-      thumbs.forEach((t, j) => t.setAttribute('aria-current', String(j === index)));
-      thumbs[index].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  function renderSection(s, i) {
+    const text = el('div', { class: 'split-text', 'data-reveal': '' }, [
+      el('p', { class: 'split-num', text: String(i + 1).padStart(2, '0') }),
+      s.heading ? el('h2', { class: 'split-title', text: s.heading }) : null,
+      ...[].concat(s.text || []).map((t) => el('p', { text: t })),
+      s.bullets && s.bullets.length ? el('ul', { class: 'split-list' }, s.bullets.map(renderBullet)) : null
+    ]);
+    const figure = renderFigure(s.image, 'split-media');
+    if (!figure) return el('section', { class: 'split split-text-only container' }, [text]);
+    return el('section', { class: `split container${i % 2 ? ' split-reverse' : ''}` }, [figure, text]);
+  }
+
+  function initProjectPage(projects) {
+    const mount = $('#project-root');
+    const id = new URLSearchParams(location.search).get('id');
+    const index = projects.findIndex((p) => p.id === id);
+
+    if (index < 0) {
+      $('#p-title').textContent = 'Project not found';
+      $('#p-summary').textContent = 'That project doesn’t exist (or its link has a typo).';
+      mount.replaceChildren(el('div', { class: 'container not-found' }, [
+        el('a', { class: 'btn btn-primary', href: 'projects.html', text: 'See all projects' })
+      ]));
+      return;
     }
 
-    const parts = [main, caption];
-    if (images.length > 1) {
-      const prev = el('button', { class: 'gallery-nav gallery-prev', type: 'button', 'aria-label': 'Previous image', html: ICONS.prev });
-      const next = el('button', { class: 'gallery-nav gallery-next', type: 'button', 'aria-label': 'Next image', html: ICONS.next });
-      prev.addEventListener('click', () => show(index - 1));
-      next.addEventListener('click', () => show(index + 1));
-      main.append(prev, next);
-      parts.push(el('div', { class: 'gallery-thumbs' }, thumbs));
+    const p = projects[index];
+    const nextP = projects[(index + 1) % projects.length];
+    document.title = `${p.title} | ${document.title.split('|').pop().trim()}`;
 
-      // Arrow keys + swipe
-      modal.onkeydown = (e) => {
-        if (e.key === 'ArrowLeft') show(index - 1);
-        if (e.key === 'ArrowRight') show(index + 1);
-      };
-      let startX = null;
-      main.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
-      main.addEventListener('touchend', (e) => {
-        if (startX === null) return;
-        const dx = e.changedTouches[0].clientX - startX;
-        if (Math.abs(dx) > 40) show(index + (dx < 0 ? 1 : -1));
-        startX = null;
-      });
-    } else {
-      modal.onkeydown = null;
-    }
-    return el('div', { class: 'gallery' }, parts);
+    // Dark header
+    $('#p-meta').textContent = metaLine(p);
+    $('#p-title').textContent = p.title;
+    $('#p-summary').textContent = p.summary;
+    $('#p-extras').replaceChildren(...[renderTools(p.tools), renderLinks(p.links)].filter(Boolean));
+
+    const facts = [
+      ['Project type', p.category],
+      ['Timeline', p.dates],
+      ['Role', p.role],
+      ['Technologies', (p.tools || []).join(', ')]
+    ].filter((f) => f[1]);
+
+    const blocks = [
+      // Cover image overlapping the header
+      el('div', { class: 'container project-cover' }, [renderFigure({ src: p.cover, caption: p.coverCaption }, 'cover-figure')]),
+
+      el('div', { class: 'container' }, [
+        el('dl', { class: 'facts facts-strip', 'data-reveal': '' },
+          facts.map(([k, v]) => el('div', {}, [el('dt', { text: k }), el('dd', { text: v })])))
+      ]),
+
+      p.overview ? el('section', { class: 'container overview' }, [
+        el('h2', { class: 'overview-label', text: 'Overview', 'data-reveal': '' }),
+        el('div', {}, [].concat(p.overview).map((t) => el('p', { text: t, 'data-reveal': '' })))
+      ]) : null,
+
+      ...(p.sections || []).map(renderSection),
+
+      p.skills && p.skills.length ? el('section', { class: 'container skills-block' }, [
+        el('h2', { class: 'block-title', text: 'Key skills demonstrated', 'data-reveal': '' }),
+        el('ul', { class: 'skill-list', 'data-reveal': '' }, p.skills.map((s) => el('li', { text: s })))
+      ]) : null,
+
+      p.gallery && p.gallery.length ? el('section', { class: 'container gallery-block' }, [
+        el('h2', { class: 'block-title', text: 'Gallery', 'data-reveal': '' }),
+        el('div', { class: `gallery-grid${p.gallery.length === 3 ? ' is-mosaic' : ''}` },
+          p.gallery.map((g) => renderFigure(g, 'gallery-item')))
+      ]) : null,
+
+      // Next project + back to all
+      projects.length > 1 ? el('section', { class: 'next-block' }, [
+        el('div', { class: 'container' }, [
+          el('a', { class: 'next-card', href: projectUrl(nextP), 'data-reveal': '' }, [
+            el('div', { class: 'next-media' }, [el('img', { src: nextP.cover, alt: '', loading: 'lazy' })]),
+            el('div', { class: 'next-text' }, [
+              el('p', { class: 'card-meta', text: 'Next project' }),
+              el('h2', { class: 'next-title', text: nextP.title }),
+              el('span', { class: 'more-arrow', html: ICONS.arrow })
+            ])
+          ]),
+          el('div', { class: 'project-actions' }, [
+            el('a', { class: 'btn btn-secondary', href: 'projects.html', text: '← All projects' })
+          ])
+        ])
+      ]) : null
+    ];
+
+    mount.replaceChildren(...blocks.filter(Boolean));
+    setupReveals(mount);
+    parallaxImages('.split-media .figure-frame img, .cover-figure .figure-frame img');
+    if (animate) ScrollTrigger.refresh();
   }
-
-  function openProject(id, { updateUrl = true } = {}) {
-    const p = projects.find((x) => x.id === id);
-    if (!p) return;
-    lastFocus = document.activeElement;
-
-    const content = el('div', { class: 'modal-content' }, [
-      p.year ? el('p', { class: 'card-meta', text: p.year }) : null,
-      el('h2', { class: 'modal-title', id: 'modal-title', text: p.title }),
-      el('p', { class: 'modal-summary', text: p.summary }),
-      renderTools(p.tools),
-      renderLinks(p.links),
-      p.details && p.details.length ? renderDetails(p.details) : null
-    ]);
-    modalBody.replaceChildren(renderGallery(p), content);
-    modalBody.scrollTop = 0;
-
-    modal.showModal();
-    document.body.classList.add('modal-open');
-    $('#modal-close').focus();
-    if (updateUrl) history.replaceState(null, '', `#project/${encodeURIComponent(id)}`);
-  }
-
-  function closeProject() {
-    if (modal.open) modal.close();
-  }
-
-  modal.addEventListener('close', () => {
-    document.body.classList.remove('modal-open');
-    if (location.hash.startsWith('#project/')) history.replaceState(null, '', '#projects');
-    if (lastFocus) lastFocus.focus({ preventScroll: true });
-  });
-  $('#modal-close').addEventListener('click', closeProject);
-  // Click on the dimmed backdrop closes the modal.
-  modal.addEventListener('click', (e) => { if (e.target === modal) closeProject(); });
-
-  // Deep links: yoursite.com/#project/robotic-arm opens that project directly.
-  function openFromHash() {
-    const m = location.hash.match(/^#project\/(.+)$/);
-    if (!m) return;
-    $('#projects').scrollIntoView();
-    openProject(decodeURIComponent(m[1]), { updateUrl: false });
-  }
-  window.addEventListener('hashchange', openFromHash);
 
   /* ---------------- Animations ---------------- */
+  // Fade-up for anything marked data-reveal (safe to call again for new content).
+  function setupReveals(scope = document) {
+    if (!animate) return;
+    $$('[data-reveal]', scope).forEach((node) => {
+      if (node.dataset.revealReady) return;
+      node.dataset.revealReady = '1';
+      gsap.fromTo(node, { opacity: 0, y: 50 }, {
+        opacity: 1, y: 0, duration: 1.1, ease: 'power3.out',
+        scrollTrigger: { trigger: node, start: 'top 90%', once: true }
+      });
+    });
+  }
+
+  // Images drift slightly inside their frames as you scroll.
+  function parallaxImages(selector) {
+    if (!animate) return;
+    $$(selector).forEach((img) => {
+      gsap.fromTo(img, { scale: 1.15, yPercent: -5 }, {
+        yPercent: 5, ease: 'none',
+        scrollTrigger: { trigger: img.parentElement, start: 'top bottom', end: 'bottom top', scrub: true }
+      });
+    });
+  }
+
+  function revealCards(container) {
+    if (!animate) return;
+    const cards = $$('[data-card]', container);
+    gsap.set(cards, { opacity: 0, y: 80 });
+    ScrollTrigger.batch(cards, {
+      start: 'top 92%', once: true,
+      onEnter: (batch) => gsap.to(batch, {
+        opacity: 1, y: 0, duration: 1, ease: 'power3.out', stagger: 0.12,
+        clearProps: 'transform' // hand hover transforms back to CSS
+      })
+    });
+    ScrollTrigger.refresh();
+  }
+
   function initAnimations() {
     if (!animate) return;
 
-    // Hero: portrait rises in, then the text fades + scales in beside it
-    gsap.timeline({ defaults: { ease: 'power3.out' } })
-      .fromTo('.hero-portrait img', { opacity: 0, y: 80 }, { opacity: 1, y: 0, duration: 1.6 }, 0)
-      .fromTo('.hero-rule', { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.9 }, 0.25)
-      .fromTo('[data-hero]:not(.hero-rule)',
+    // Load-in: portrait rises (home), rule draws, then header text fades + scales in
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    if ($('.hero-portrait img')) tl.fromTo('.hero-portrait img', { opacity: 0, y: 80 }, { opacity: 1, y: 0, duration: 1.6 }, 0);
+    if ($('.hero-rule')) tl.fromTo('.hero-rule', { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.9 }, 0.25);
+    if ($('[data-hero]:not(.hero-rule)')) {
+      tl.fromTo('[data-hero]:not(.hero-rule)',
         { opacity: 0, y: 40, scale: 0.94 },
         { opacity: 1, y: 0, scale: 1, duration: 1.2, stagger: 0.12 }, 0.35);
+    }
 
-    // Hero: portrait zooms + parallaxes, text drifts up and fades as you scroll
-    gsap.to('.hero-portrait img', {
-      yPercent: 14, scale: 1.08, transformOrigin: '50% 100%', ease: 'none',
-      scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
-    });
-    gsap.to('.hero-content', {
-      yPercent: -20, opacity: 0, ease: 'none',
-      scrollTrigger: { trigger: '.hero', start: 'top top', end: '70% top', scrub: true }
-    });
-
-    // Generic fade-up for headings, photo, form, etc.
-    $$('[data-reveal]').forEach((node) => {
-      gsap.fromTo(node, { opacity: 0, y: 50 }, {
-        opacity: 1, y: 0, duration: 1.1, ease: 'power3.out',
-        scrollTrigger: { trigger: node, start: 'top 88%', once: true }
+    // Home hero: portrait zooms + parallaxes, text drifts up and fades as you scroll
+    if ($('.hero')) {
+      gsap.to('.hero-portrait img', {
+        yPercent: 14, scale: 1.08, transformOrigin: '50% 100%', ease: 'none',
+        scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
       });
-    });
+      gsap.to('.hero-content', {
+        yPercent: -20, opacity: 0, ease: 'none',
+        scrollTrigger: { trigger: '.hero', start: 'top top', end: '70% top', scrub: true }
+      });
+    }
+
+    setupReveals();
 
     // Bio: reveal line by line. Lines are measured at the moment the paragraph
     // scrolls into view, then the plain text is restored so it reflows on resize.
@@ -318,11 +426,7 @@
       });
     });
 
-    // Subtle photo parallax in About
-    gsap.fromTo('.about-photo img', { scale: 1.15, yPercent: -5 }, {
-      yPercent: 5, ease: 'none',
-      scrollTrigger: { trigger: '.about-photo', start: 'top bottom', end: 'bottom top', scrub: true }
-    });
+    parallaxImages('.about-photo img');
   }
 
   function splitLines(node, text) {
@@ -347,23 +451,10 @@
     });
   }
 
-  function animateCards() {
-    if (!animate) return;
-    const cards = $$('.project-card');
-    gsap.set(cards, { opacity: 0, y: 80 });
-    ScrollTrigger.batch(cards, {
-      start: 'top 90%', once: true,
-      onEnter: (batch) => gsap.to(batch, {
-        opacity: 1, y: 0, duration: 1, ease: 'power3.out', stagger: 0.12,
-        clearProps: 'transform' // hand hover transforms back to CSS
-      })
-    });
-    ScrollTrigger.refresh();
-  }
-
   /* ---------------- Contact form (Formspree) ---------------- */
   function initForm() {
     const form = $('#contact-form');
+    if (!form) return;
     const status = $('#form-status');
     const setStatus = (text, type = '') => {
       status.textContent = text;
@@ -398,9 +489,21 @@
   }
 
   /* ---------------- Boot ---------------- */
-  $('#year').textContent = new Date().getFullYear();
+  $$('[data-year]').forEach((n) => { n.textContent = new Date().getFullYear(); });
   initNav();
   initForm();
   initAnimations();
-  loadProjects();
+
+  getProjects()
+    .then((projects) => {
+      buildNavDropdown(projects);
+      if (page === 'home') initHomeProjects(projects);
+      if (page === 'projects') initProjectsPage(projects);
+      if (page === 'project') initProjectPage(projects);
+    })
+    .catch((err) => {
+      console.error('Could not load projects:', err);
+      const target = $('#project-carousel') || $('#all-projects') || $('#project-root');
+      if (target) showError(target);
+    });
 })();

@@ -33,7 +33,7 @@
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script defer src="js/main.js"></script>
 </head>
-<body>
+<body data-page="home">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <!-- ============ NAVIGATION ============ -->
@@ -49,7 +49,18 @@
       <ul class="nav-links" id="nav-menu">
         <li><a href="#home" data-nav="home">Home</a></li>
         <li><a href="#about" data-nav="about">About</a></li>
-        <li><a href="#projects" data-nav="projects">Projects</a></li>
+        <li class="has-dropdown">
+          <a href="projects.html" data-nav="projects">Projects
+            <svg class="nav-caret" viewBox="0 0 12 12" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="m3 4.5 3 3 3-3"/></svg>
+          </a>
+          <!-- Filled in automatically from content/projects.json -->
+          <div class="dropdown">
+            <div class="dropdown-panel">
+              <ul class="dropdown-list" data-project-menu></ul>
+              <a class="dropdown-all" href="projects.html">View all projects <span aria-hidden="true">→</span></a>
+            </div>
+          </div>
+        </li>
         <li><a href="#contact" data-nav="contact">Contact</a></li>
         <li>
           <!-- ✏️ EDIT: your GitHub URL -->
@@ -115,16 +126,23 @@
     </section>
 
     <!-- ============ 3. PROJECTS ============ -->
-    <!-- Project cards are built automatically from content/projects.json — no need to edit here. -->
+    <!-- Cards are built automatically from content/projects.json (projects with "featured": true). -->
     <section class="section section-alt" id="projects" aria-labelledby="projects-title">
-      <div class="container">
-        <p class="section-eyebrow" data-reveal>Projects</p>
-        <h2 class="section-title" id="projects-title" data-reveal>Things I've built.</h2>
-        <p class="section-sub" data-reveal>Hardware, software, and everything in between. Click any project for the full story.</p>
-
-        <div class="project-grid" id="project-grid" aria-live="polite">
-          <p class="project-status">Loading projects…</p>
+      <div class="container section-head">
+        <div>
+          <p class="section-eyebrow" data-reveal>Projects</p>
+          <h2 class="section-title" id="projects-title" data-reveal>Things I've built.</h2>
+          <p class="section-sub" data-reveal>Hardware, software, and everything in between.</p>
         </div>
+        <div class="carousel-controls" data-reveal>
+          <a class="btn btn-secondary btn-sm" href="projects.html">All projects</a>
+          <button class="arrow-btn" id="proj-prev" type="button" aria-label="Previous projects" aria-controls="project-carousel"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m6-6-6 6 6 6"/></svg></button>
+          <button class="arrow-btn" id="proj-next" type="button" aria-label="Browse more projects" aria-controls="project-carousel"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+        </div>
+      </div>
+
+      <div class="carousel" id="project-carousel" tabindex="0" aria-label="Featured projects" aria-live="polite">
+        <p class="project-status">Loading projects…</p>
       </div>
     </section>
 
@@ -199,17 +217,10 @@
   <footer class="footer">
     <div class="container footer-inner">
       <!-- ✏️ EDIT: your name -->
-      <p>© <span id="year"></span> Your Name. Built in Boston.</p>
+      <p>© <span data-year></span> Your Name. Built in Boston.</p>
       <a href="#home">Back to top ↑</a>
     </div>
   </footer>
 
-  <!-- ============ PROJECT DETAIL MODAL (filled in by js/main.js) ============ -->
-  <dialog class="modal" id="project-modal" aria-labelledby="modal-title">
-    <button class="modal-close" id="modal-close" aria-label="Close project details">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M6 6l12 12M18 6 6 18"/></svg>
-    </button>
-    <div class="modal-body" id="modal-body"></div>
-  </dialog>
 </body>
 </html>

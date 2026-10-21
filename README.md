@@ -8,22 +8,31 @@ A clean, Apple-style personal website. Plain HTML, CSS, and JavaScript — no bu
 
 ```
 portfolio/
-├── index.html              ← the page itself (your name, bio, contact info live here)
+├── index.html              ← home page (hero, about, featured projects, resume, contact)
+├── projects.html           ← "all projects" page (cards are built automatically)
+├── project.html            ← ONE template that shows any project's details page
 ├── css/style.css           ← all the styling (colors are at the very top)
-├── js/main.js              ← animations + builds project cards (you shouldn't need to touch it)
+├── js/main.js              ← animations + builds every project card/page (you shouldn't need to touch it)
 ├── content/
 │   └── projects.json       ← ⭐ ALL your projects live here
 ├── assets/
 │   ├── images/             ← your hero cut-out photo, About photo, favicon
 │   ├── projects/
-│   │   ├── robotic-arm/              ← one folder of photos per project
-│   │   ├── autonomous-mobile-robot/
-│   │   └── vision-pose-estimation/
+│   │   ├── blind-spot-radar/           ← one folder of photos per project
+│   │   ├── smart-irrigation/
+│   │   └── ev-solar-dc-dc-converter/
 │   └── docs/               ← resume.pdf and project report PDFs
 └── .nojekyll               ← tells GitHub Pages to serve files as-is (leave it alone)
 ```
 
-Every place in `index.html` you're expected to change is marked with a **✏️ EDIT** comment. Search the file for `✏️` to find them all.
+**How the project pages work:** you never make a new HTML page for a project. Every project you add to `content/projects.json` automatically shows up in four places:
+
+1. the **Projects dropdown** in the top menu (hover over "Projects"),
+2. the **home page carousel** (if it has `"featured": true`), with a **View Project** button,
+3. the **All projects page** (`projects.html`), with a **See More** button,
+4. its own **details page** at `project.html?id=<its id>`.
+
+Every place you're expected to change in the HTML files is marked with a **✏️ EDIT** comment. Search for `✏️` to find them all. The nav menu and footer appear on all three HTML pages, so change your name/links in each of `index.html`, `projects.html` and `project.html`.
 
 ---
 
@@ -47,45 +56,47 @@ After you edit something, just refresh the browser. If a change doesn't show up,
 You only touch two things: a folder of images and `content/projects.json`.
 
 **Step 1 — Add your images.**
-Create a new folder inside `assets/projects/` named after your project, using lowercase and dashes, e.g.:
+Create a new folder inside `assets/projects/` named after your project, using lowercase and dashes, e.g. `assets/projects/drone-swarm/`. Drop your photos in it (e.g. `cover.jpg`, `wiring.jpg`, `test-day.jpg`).
+Tips: landscape photos look best. Keep each under ~500 KB — [squoosh.app](https://squoosh.app) shrinks them for free.
 
-```
-assets/projects/drone-swarm/
-```
-
-Drop your photos in it, e.g. `cover.jpg`, `build.jpg`, `flight-test.jpg`.
-Tips: landscape photos look best (roughly 16:10). Keep each under ~500 KB — [squoosh.app](https://squoosh.app) shrinks them for free.
-
-**Step 2 — (Optional) add a PDF report.**
-Put it in `assets/docs/`, e.g. `assets/docs/drone-swarm-report.pdf`.
+**Step 2 — (Optional) add a PDF report** to `assets/docs/`, e.g. `assets/docs/drone-swarm-report.pdf`.
 
 **Step 3 — Add an entry to `content/projects.json`.**
-Open the file. It's a list of projects inside `[ ... ]`, separated by commas. Copy one existing project block (from its `{` to its matching `}`), paste it where you want it to appear (order in the file = order on the site), and edit the values:
+The file is a list of projects inside `[ ... ]`, separated by commas. Copy one whole existing project (from its `{` to its matching `}`), paste it where you want it (order in the file = order on the site), and edit the values:
 
 ```json
   {
     "id": "drone-swarm",
     "title": "Cooperative Drone Swarm",
-    "year": "2026",
-    "summary": "One or two sentences that appear on the card.",
+    "category": "Course Project",
+    "dates": "Jan 2026 – Apr 2026",
+    "role": "Team lead · 4 students",
+    "featured": true,
+    "summary": "One or two sentences shown on the cards and at the top of the project page.",
     "cover": "assets/projects/drone-swarm/cover.jpg",
-    "tools": ["ROS 2", "Python", "PX4", "Gazebo"],
+    "coverCaption": "Three drones holding formation.",
+    "tools": ["ROS 2", "Python", "PX4"],
+    "skills": ["Control systems", "Teamwork"],
     "links": {
       "github": "https://github.com/YOUR-USERNAME/drone-swarm",
-      "video": "https://www.youtube.com/watch?v=abc123",
+      "video": "",
       "report": "assets/docs/drone-swarm-report.pdf"
     },
-    "gallery": [
-      { "src": "assets/projects/drone-swarm/cover.jpg", "caption": "Three drones holding formation." },
-      { "src": "assets/projects/drone-swarm/build.jpg", "caption": "Frame assembly." }
+    "overview": "A short paragraph introducing the project — shown big near the top of its page.",
+    "sections": [
+      {
+        "heading": "How it works",
+        "text": "A paragraph of text.",
+        "bullets": ["A bullet point", "Label: a bullet with a bold label"],
+        "image": { "src": "assets/projects/drone-swarm/wiring.jpg", "caption": "Wiring the flight controller." }
+      },
+      {
+        "heading": "Results",
+        "text": ["First paragraph.", "Second paragraph."]
+      }
     ],
-    "details": [
-      "## Overview",
-      "A normal paragraph of text.",
-      "## What I built",
-      ["A bullet point", "Another bullet point"],
-      "## Results",
-      "Another paragraph."
+    "gallery": [
+      { "src": "assets/projects/drone-swarm/test-day.jpg", "caption": "Test flight day." }
     ]
   },
 ```
@@ -94,22 +105,30 @@ What each field means:
 
 | Field | What it does |
 |---|---|
-| `id` | A unique short name (lowercase, dashes). Also gives the project its own link: `yoursite/#project/drone-swarm` |
+| `id` | Unique short name (lowercase, dashes). Becomes the page link: `project.html?id=drone-swarm` |
 | `title` | Project name |
-| `year` | Small label above the title (can be `""`) |
-| `summary` | Short text on the card and at the top of the pop-up |
-| `cover` | The image shown on the card |
-| `tools` | The little tag pills. Add as many as you like |
-| `links` | `github`, `video`, `report`. **Leave any of them as `""` to hide that link** |
-| `gallery` | Photos in the pop-up. Each has a `src` (file path) and a `caption` |
-| `details` | The long write-up in the pop-up. Text = paragraph, text starting with `## ` = heading, `[ ... ]` = bullet list |
+| `category` / `dates` | Small label above the title, e.g. "Final Year Capstone Project · Sept 2024 – June 2025" |
+| `role` | Optional. Shown in the facts row on the project page |
+| `featured` | `true` = also show it in the home-page carousel. `false` = only on the All projects page |
+| `summary` | Short text on the cards and under the title on the project page |
+| `cover` / `coverCaption` | The main image (cards, dropdown, and the big image at the top of the project page) |
+| `tools` | The little tag pills |
+| `skills` | "Key skills demonstrated" pills on the project page |
+| `links` | `github`, `video`, `report`. **Leave any as `""` to hide it** |
+| `overview` | Intro paragraph on the project page |
+| `sections` | The story of the project. Each section can have a `heading`, `text` (one paragraph, or a list `[...]` of paragraphs), `bullets`, and an `image`. Sections **with** an image alternate picture-left / picture-right automatically; sections **without** one are just text |
+| `gallery` | Extra photos in a grid at the bottom of the project page (3 photos make a nice mosaic) |
 
 **Step 4 — Check the commas.** This is the #1 cause of problems:
 - Every project block except the **last** one needs a comma after its closing `}`.
 - Inside a block, every line except the last one before a `}` or `]` needs a comma.
 - Use straight double quotes `"like this"`, not curly quotes.
 
-If the Projects section says *"Couldn't load projects"*, paste the whole file into [jsonlint.com](https://jsonlint.com) — it will point at the exact line with the typo.
+If a page says *"Couldn't load projects"*, paste the whole file into [jsonlint.com](https://jsonlint.com) — it points at the exact line with the typo.
+
+**Replacing the placeholder pictures:** each grey/blue/green/brown placeholder says *"replace: filename.svg"* at the bottom. Put your photo in the same folder (e.g. `hardware.jpg`), then in `projects.json` change `hardware.svg` to `hardware.jpg`. Delete the old `.svg` when you're done.
+
+**Placeholder text:** the three current projects were written from your project portfolio PDF. Read them over and fill in the sections marked **✏️ Placeholder** (mostly the Results) with your real numbers.
 
 **To remove a project:** delete its block (and fix the commas), then delete its image folder.
 
@@ -208,4 +227,4 @@ Bought a domain like `yourname.com`? In **Settings → Pages → Custom domain**
 - **Light/dark mode** follows the visitor's system setting automatically.
 - **Reduced motion:** if a visitor has "Reduce motion" turned on (macOS: *System Settings → Accessibility → Display*; iOS: *Settings → Accessibility → Motion*), all scroll and fade animations are switched off and everything is simply shown.
 - **Animations** use [GSAP](https://gsap.com) + ScrollTrigger, loaded from the cdnjs CDN in `index.html`. If the CDN ever fails, the site still works, just without animations.
-- **Sharing a project:** every project has its own link, e.g. `https://YOUR-USERNAME.github.io/#project/robotic-arm` opens that project's pop-up directly.
+- **Sharing a project:** every project has its own page, e.g. `https://kamsinkem.github.io/portfolio/project.html?id=blind-spot-radar`.
