@@ -222,6 +222,125 @@
     ]
   },
   {
+    "id": "psemi-murata-internship",
+    "title": "pSemi (Murata) Internship — Automation and Characterization",
+    "category": "Engineering Internship · pSemi, a Murata Company",
+    "dates": "",
+    "role": "Engineering Intern",
+    "featured": true,
+    "summary": "Automation and characterization internship on power-management ICs: I designed a KiCad I²C breakout board for thermostream testing, built LabVIEW automation for supply-current and temperature characterization, and validated I²C communication on evaluation boards.",
+    "cover": "assets/projects/psemi-murata-internship/cover.jpg",
+    "coverCaption": "Characterization bench: four-channel programmable supply, NI USB-845x I²C/SPI interface and the circular thermostream breakout board under test.",
+    "tools": [
+      "KiCad",
+      "LabVIEW",
+      "NI-845x / NI USB-8451",
+      "NI-DAQmx",
+      "NI-VISA",
+      "Hot-air rework station",
+      "Thermostream"
+    ],
+    "skills": [
+      "PCB schematic capture and layout",
+      "Automated test and data acquisition",
+      "I²C and digital I/O control",
+      "Supply-current and temperature characterization",
+      "SMD soldering and IC rework",
+      "Bench debugging and root-cause analysis"
+    ],
+    "links": {
+      "github": "",
+      "video": "",
+      "report": ""
+    },
+    "overview": "At pSemi, a Murata company, I worked in automation and characterization of power-management ICs. The work spanned the full test chain — designing a two-layer KiCad I²C breakout board for thermostream temperature testing, assembling and reworking test hardware, and writing LabVIEW automation that controls the device over I²C and digital I/O while sweeping supply voltage and logging current. I replicated an existing characterization rig, measured the device's supply current in three power modes across 3.2 V, 4.2 V and 5 V and over temperature, traced start-up current spikes to capacitive inrush (I = C·dV/dt) and eliminated them by reducing the voltage step to 100 mV, and ran I²C communication tests on nominal and process-skew charge-pump boards.",
+    "sections": [
+      {
+        "heading": "I²C Breakout Board for Thermostream Testing",
+        "text": [
+          "I took a circuit diagram from an initial sketch to a fabricated two-layer PCB in KiCad: schematic capture, annotation, power and ground symbols and ERC, then footprint assignment, placement, routing, vias, ground planes, silkscreen and DRC. The circular board centres the device socket inside a defined thermostream zone, with all signals fanned out to connectors at the rim so the rest of the board stays outside the temperature-controlled area."
+        ],
+        "bullets": [
+          "Thermal design: thicker copper, large ground and power planes and copper heat paths across the thermostream area to avoid hot spots.",
+          "Grounding: plated through-hole stitching vias around the board keep both ground layers at one low-impedance potential."
+        ],
+        "image": {
+          "src": "assets/projects/psemi-murata-internship/breakout-board.jpg",
+          "caption": "Fabricated two-layer circular breakout board: central device socket inside the thermostream zone, signals fanned out to rim connectors."
+        }
+      },
+      {
+        "heading": "Soldering, Rework and Test-Hardware Assembly",
+        "text": [
+          "I trained on SMD soldering and IC installation and removal, then assembled test hardware for the characterization rigs, including an SPST relay board, an NI-8452 expander board and a pogo-pin interface (two 1 mm washers give about 1 mm of pin compression)."
+        ],
+        "bullets": [
+          "Hot-air rework: board alignment, laser positioning, nozzle alignment, thermocouple placement, PCB preheat, IC lift-off and controlled cool-down.",
+          "Process control: optical alignment camera and a temperature-profile GUI with real-time heater and board temperature.",
+          "Drag soldering: fine-pitch ICs tacked at the corners, dragged pin rows, then inspected and cleaned of bridges with flux and solder wick."
+        ],
+        "image": {
+          "src": "assets/projects/psemi-murata-internship/relay-board.jpg",
+          "caption": "SPST relay board and NI-8452 expander stacked on a characterization baseboard, routing DMM and supply connections under software control."
+        }
+      },
+      {
+        "heading": "LabVIEW Automation for Supply-Current Characterization",
+        "text": [
+          "After completing NI LabVIEW Core 1 (24 hours, 56 lessons: dataflow programming, state machines, DAQ, instrument control and file I/O), I replicated an existing rig and wrote the automation to measure supply current — the current the IC draws from the battery — in three modes: IC off (EN low), IC on with I²C register 0 low, and IC on with register 0 high.",
+          "The VI sweeps the input across 3.2 V, 4.2 V and 5 V, takes 10 readings per point, and logs the results to file. The rig combines a programmable power supply, Keysight 34461A digital multimeters, a DAQ973A data-acquisition system, an N6705C DC power analyzer, electronic load banks, a waveform generator and an oscilloscope."
+        ],
+        "bullets": [
+          "Structure: for loop over samples, voltage loop over set-points, case structure for mode selection and shift registers to carry state between iterations.",
+          "Timing: settle delay calculated from the measured ramp time between set-points.",
+          "Numerics: voltages scaled ×10 to integers to avoid floating-point comparison errors.",
+          "Digital control: enable pin driven from a digital I/O line at a 1.8 V I/O level; I²C address chosen from the ADDR-pin state, with internal pull-ups configurable."
+        ],
+        "image": {
+          "src": "assets/projects/psemi-murata-internship/labview-measurement-loop.jpg",
+          "caption": "LabVIEW block diagram: nested temperature, voltage and test-condition loops with a state machine stepping through the EN/register modes, I²C register writes and DMM single-point reads."
+        }
+      },
+      {
+        "heading": "Debugging, Temperature Sweeps and Charge-Pump I²C Validation",
+        "text": [
+          "Two problems came up. The enable line could not be driven reliably until I traced it to the DAQ's level-shift buffers, which only activate when their own supply is in range — powering the buffers fixed it. The first current sweeps also showed spikes at start-up and at each voltage step; I identified capacitive inrush (I = C·dV/dt) as the cause and reduced the step size to 100 mV, giving stable readings. I then repeated the measurements over temperature at −40, 25, 85 and 125 °C.",
+          "On a second product, a high-efficiency charge pump, I tested I²C communication on nominal and process-skew boards by toggling register bits for divide-by-2 mode and charge-pump enable, and verified SDA/SCL logic levels with a multimeter."
+        ],
+        "bullets": [
+          "Open-drain bus: confirmed external pull-ups hold SDA and SCL high when no device pulls them low.",
+          "Interface: NI USB-8451 I²C/SPI adapter with a pull-up breakout."
+        ],
+        "image": {
+          "src": "assets/projects/psemi-murata-internship/ni-usb-8451.jpg",
+          "caption": "NI USB-8451 I²C/SPI interface with a stripboard pull-up breakout used to drive the charge-pump boards' I²C bus."
+        }
+      }
+    ],
+    "gallery": [
+      {
+        "src": "assets/projects/psemi-murata-internship/test-rack.jpg",
+        "caption": "Replicated characterization rack: DAQ973A, 34461A multimeters, N6705C DC power analyzer, programmable supplies and electronic loads."
+      },
+      {
+        "src": "assets/projects/psemi-murata-internship/labview-logging.jpg",
+        "caption": "LabVIEW data logging and shutdown: results transposed and written to file with temperature, voltage, EN-pin, enable-register and supply columns, then the supply, DMM and thermostream are closed out."
+      },
+      {
+        "src": "assets/projects/psemi-murata-internship/pogo-fixture.jpg",
+        "caption": "Pogo-pin interface on a characterization baseboard, with standoffs and washers setting about 1 mm of pin compression."
+      },
+      {
+        "src": "assets/projects/psemi-murata-internship/smd-boards.jpg",
+        "caption": "NI-8452 expander boards during SMD assembly on the ESD bench."
+      },
+      {
+        "src": "assets/projects/psemi-murata-internship/rework-station.jpg",
+        "caption": "Hot-air rework station with optical alignment, laser positioning and a PC-based temperature-profile GUI."
+      }
+    ]
+  },
+  {
     "id": "smart-irrigation",
     "title": "Smart Irrigation System",
     "category": "Community-Based Project · Maynooth University",
