@@ -665,7 +665,7 @@ figcaption { margin-top: 0.85rem; font-size: 0.9rem; color: var(--text-2); }
 .overview { display: grid; gap: 1rem 3rem; padding: clamp(3.5rem, 8vw, 6.5rem) 0 clamp(1.5rem, 4vw, 3rem); }
 @media (min-width: 860px) { .overview { grid-template-columns: minmax(0, 1fr) minmax(0, 2.6fr); } }
 .overview-label { font-size: 1.05rem; font-weight: 600; color: var(--accent); padding-top: 0.5rem; }
-.overview p { font-size: clamp(1.35rem, 2.5vw, 1.95rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.35; }
+.overview p { font-size: clamp(1.15rem, 1.8vw, 1.45rem); font-weight: 500; letter-spacing: -0.015em; line-height: 1.55; }
 .overview p + p { margin-top: 1rem; }
 
 .split { display: grid; gap: clamp(1.75rem, 5vw, 4.5rem); align-items: center; padding-block: clamp(2.5rem, 6vw, 5rem); }

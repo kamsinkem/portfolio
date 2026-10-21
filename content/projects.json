@@ -2,108 +2,417 @@
   {
     "id": "blind-spot-radar",
     "title": "Blind Spot Detection with FMCW Radar and ADALM Pluto SDR",
-    "category": "Final Year Capstone Project",
+    "category": "Final Year Project · B.E. Electronic Engineering, Maynooth University",
     "dates": "Sept 2024 – June 2025",
+    "role": "Individual thesis · Supervisor: John Dooley",
     "featured": true,
-    "summary": "A proof-of-concept FMCW radar built on the ADALM Pluto software-defined radio that detects multiple objects and estimates how far away each one is — the core sensing behind vehicle blind-spot detection.",
-    "cover": "assets/projects/blind-spot-radar/cover.svg",
-    "coverCaption": "The radar test setup.",
-    "tools": ["MATLAB", "ADALM Pluto SDR", "Signal Processing", "FMCW Radar", "Wireless Systems"],
-    "skills": ["Signal processing", "SDR systems", "MATLAB development", "Experimental testing", "Hardware–software integration", "Problem solving"],
+    "summary": "A low-cost 2.4 GHz FMCW radar for automotive blind-spot detection, built on a single ADALM-Pluto SDR controlled from MATLAB, with hand-built circular-waveguide \"cantenna\" antennas.",
+    "cover": "assets/projects/blind-spot-radar/cover.jpg",
+    "coverCaption": "The two hand-built cantennas (TX and RX): 9 cm diameter metal cans with quarter-wave monopole probes fed through SMA-to-N adapters.",
+    "tools": [
+      "MATLAB",
+      "ADALM-Pluto SDR",
+      "Communications Toolbox",
+      "Signal Processing Toolbox",
+      "FFT spectral analysis",
+      "Circular waveguide antennas"
+    ],
+    "skills": [
+      "FMCW radar waveform design",
+      "Software-defined radio",
+      "Digital signal processing",
+      "RF antenna design",
+      "RF test and measurement",
+      "ISM-band regulatory compliance"
+    ],
     "links": {
       "github": "",
       "video": "",
       "report": ""
     },
-    "overview": "Blind-spot detection systems warn drivers about vehicles they can't see in their mirrors. For my final-year capstone, I built a proof-of-concept of the sensing side of that problem: an FMCW radar on low-cost ADALM Pluto SDR hardware that detects multiple objects in a controlled environment and estimates the distance to each one.",
+    "overview": "Commercial automotive radars rely on expensive 77 GHz millimetre-wave hardware, and published SDR-based FMCW radars typically use USRP devices that cost about ten times more than an ADALM-Pluto. I set out to implement a frequency-modulated continuous-wave (FMCW) radar for blind-spot detection on a single low-cost Pluto SDR, transmitting and receiving in the 2.4 GHz ISM band, with the waveform, acquisition and FFT-based processing written in MATLAB. I derived the radar parameters (30 MSPS, 15 MHz sweep bandwidth, 10 m range resolution, 15 m maximum range), designed and built two circular-waveguide \"cantenna\" antennas for 2.5 GHz, and validated the chain step by step: a 100 kHz loopback tone, a single-sideband LFM chirp in loopback and over the air, and a TX LO leakage measurement. The leakage test located a -43.17 dB spur 0.2 kHz from the 2.4 GHz carrier, well above a -60 to -110 dB noise floor, and identified the Pluto's zero-IF TX-to-RX leakage as the main obstacle to extracting the beat frequency for ranging.",
     "sections": [
       {
-        "heading": "How FMCW radar measures distance",
+        "heading": "Single-SDR FMCW architecture",
         "text": [
-          "An FMCW (frequency-modulated continuous-wave) radar transmits a “chirp” — a signal whose frequency sweeps steadily over time. When the chirp reflects off an object and comes back, it arrives slightly late, so at any instant the received signal is at a different frequency from the one being sent.",
-          "That frequency difference grows with the object's distance. Measuring it turns a timing problem into a frequency problem, which is much easier to solve with signal processing."
+          "The radar uses one ADALM-Pluto for both transmit and receive. MATLAB acts as the IIO client through the comm.SDRTxPluto and comm.SDRRxPluto System objects, setting sample rate, bandwidth, LO frequency and gain. A baseband FMCW waveform defined in MATLAB passes through the Zynq FPGA to the RF transceiver, which upconverts, amplifies, filters and radiates it; the echo is downconverted with a zero-IF mixer, digitised by the 12-bit ADC and returned to MATLAB for processing.",
+          "Operation was restricted to the 2.4 GHz ISM band (2.400–2.500 GHz). The Pluto's 7 dBm maximum output sits within FCC Part 15 and ETSI EN 300 328 limits, and directional antennas were positioned to keep RF exposure away from people."
         ],
-        "image": { "src": "assets/projects/blind-spot-radar/chirp-diagram.svg", "caption": "Transmitted vs. received chirp — the gap between them reveals distance." }
-      },
-      {
-        "heading": "Building it on the ADALM Pluto SDR",
-        "text": "The ADALM Pluto is a small, affordable software-defined radio. I used it as the radar's transmitter and receiver, with the signal generation and processing written in MATLAB.",
         "bullets": [
-          "Developed a proof-of-concept FMCW radar detection system on ADALM Pluto SDR hardware.",
-          "Implemented distance estimation algorithms by analyzing the frequency difference between transmitted and received signals.",
-          "Applied signal processing techniques to extract meaningful data from the received radar signals."
+          "Tuning range: 325 MHz to 3.8 GHz, 200 kHz to 20 MHz channel bandwidth",
+          "Converters: 12-bit ADC and DAC, ±25 ppm frequency accuracy",
+          "Interface: USB 2.0 to MATLAB via the ADALM-Pluto hardware support package"
         ],
-        "image": { "src": "assets/projects/blind-spot-radar/hardware.svg", "caption": "ADALM Pluto SDR and antenna setup." }
+        "image": {
+          "src": "assets/projects/blind-spot-radar/sdr-signal-flow.jpg",
+          "caption": "Pluto SDR signal flow: MATLAB waveform to FPGA to RF front end on transmit, and the reverse path on receive."
+        }
       },
       {
-        "heading": "Testing in a controlled environment",
-        "text": "To understand how well the system really works, I designed and ran controlled experiments that evaluated:",
+        "heading": "Waveform and range equations",
+        "text": [
+          "I used a linear sawtooth chirp defined by start frequency, sweep bandwidth B and sweep time Tc. Mixing the transmitted and received chirps and low-pass filtering leaves a beat tone fb = Sτ + fd; for a stationary target, range follows directly as R = fb·Tc·c / 2B, so an FFT of the ADC samples maps the spectral peak to target range.",
+          "The baseband chirp is generated as a complex analytic signal, A·exp(jφ), so the Pluto transmits a single sideband."
+        ],
         "bullets": [
-          "Accuracy: how close the estimated distances are to the true distances.",
-          "Resolution: how close together two objects can be and still be told apart.",
-          "Multi-object detection: detecting and ranging several objects at once.",
-          "Material sensitivity: how different materials affect the reflected signal."
+          "Sample rate: 30 MSPS, chosen for range resolution despite the extra computational load",
+          "Bandwidth: 15 MHz, half the sample rate to satisfy Nyquist",
+          "Range resolution: ΔR = c / 2B = 10 m",
+          "Max range: 15 m design target, giving a maximum round-trip delay of about 100 ns"
         ],
-        "image": { "src": "assets/projects/blind-spot-radar/test-environment.svg", "caption": "Controlled test environment with target objects." }
+        "image": {
+          "src": "assets/projects/blind-spot-radar/sawtooth-chirp.jpg",
+          "caption": "Sawtooth FMCW frequency-time plot: the delayed echo of a chirp of bandwidth B and duration Tc produces the beat frequency fb."
+        }
       },
       {
-        "heading": "Results",
-        "text": "✏️ Placeholder — add your results here: for example, measured distance error, the closest object spacing the radar could resolve, and a plot of the range spectrum showing each detected object as a peak.",
-        "image": { "src": "assets/projects/blind-spot-radar/results.svg", "caption": "Range spectrum with detected objects." }
+        "heading": "Cantenna design and build",
+        "text": [
+          "To keep cost low and add directivity, I adapted MIT OpenCourseWare's coffee-can radar antenna. Each cantenna is a 9 cm diameter metal can acting as a circular waveguide, with a heat-shrunk copper monopole probe soldered to an SMA-to-N adapter and bolted through the wall.",
+          "At the 2.5 GHz design frequency the free-space wavelength is 120 mm. The can propagates the dominant TE11 mode and cuts off TM01. For impedance matching the probe sits a quarter guide wavelength from the back wall."
+        ],
+        "bullets": [
+          "TE11 cut-off: fc = 1.841c / πD = 1952.2 MHz",
+          "TM01 cut-off: fc = 2.405c / πD = 2549.8 MHz",
+          "Guide wavelength: λg ≈ 19.2 cm at 2.5 GHz",
+          "Probe position: λg / 4 = 48 mm from the back wall"
+        ],
+        "image": {
+          "src": "assets/projects/blind-spot-radar/waveguide-design.jpg",
+          "caption": "Circular-waveguide antenna parameters: can diameter D, length H, and a λ/4 monopole probe placed λ/4 from the back wall."
+        }
+      },
+      {
+        "heading": "Validation and TX LO leakage",
+        "text": [
+          "I validated the chain incrementally. A 100 kHz complex tone in SMA loopback gave a clean single peak at 100 kHz. A 300 kHz to 1 MHz LFM chirp in loopback put its energy between about 303 and 991 kHz on the positive side of the spectrum, confirming single-sideband transmission. Over the air, with the cantennas pointed in opposite directions, the chirp still appeared from about 290 kHz to 1 MHz, which points to internal TX-to-RX coupling inside the Pluto masking the air path.",
+          "To quantify this, I transmitted frames of complex zeros at 2.4 GHz (TX gain -10 dB, RX gain 0 dB) and captured 400 frames of 4096 samples. The power spectrum from an FFT of the full buffer showed a -43.17 dB LO leakage peak 0.2 kHz from the carrier, clearly above the noise floor. A spur this strong at DC corrupts the low-frequency beat spectrum that range estimation depends on."
+        ],
+        "image": {
+          "src": "assets/projects/blind-spot-radar/lo-leakage.jpg",
+          "caption": "TX LO leakage spectrum at 2.4 GHz (TX gain -10 dB): a -43.17 dB peak at 0.2 kHz offset above a -60 to -110 dB noise floor."
+        }
       }
     ],
     "gallery": [
-      { "src": "assets/projects/blind-spot-radar/gallery-1.svg", "caption": "MATLAB processing pipeline." },
-      { "src": "assets/projects/blind-spot-radar/gallery-2.svg", "caption": "Running a multi-object test." },
-      { "src": "assets/projects/blind-spot-radar/gallery-3.svg", "caption": "Capstone presentation day." }
+      {
+        "src": "assets/projects/blind-spot-radar/cantenna-probe.jpg",
+        "caption": "Inside a cantenna: the copper monopole probe (circled) mounted a quarter guide wavelength from the back wall."
+      },
+      {
+        "src": "assets/projects/blind-spot-radar/loopback-chirp-fft.jpg",
+        "caption": "Centred FFT of the loopback LFM chirp: energy confined to roughly 303–991 kHz, confirming single-sideband transmission."
+      },
+      {
+        "src": "assets/projects/blind-spot-radar/ota-chirp-spectrum.jpg",
+        "caption": "Over-the-air chirp spectrum with the antennas pointed apart: a weaker band from about 290 kHz to 1 MHz, consistent with internal TX-to-RX coupling."
+      }
+    ]
+  },
+  {
+    "id": "segway-control",
+    "title": "Modeling and Control of a Segway",
+    "category": "Control Systems Project · Northeastern University",
+    "dates": "Spring 2026",
+    "role": "Individual project",
+    "featured": true,
+    "summary": "Derived transfer-function and state-space models of a rider-plus-Segway inverted pendulum, then designed and compared PID, full-state and reduced-state pole-placement controllers with Luenberger observers in MATLAB/Simulink.",
+    "cover": "assets/projects/segway-control/cover.jpg",
+    "coverCaption": "Simulink model of the four-state Segway plant under full-state feedback T = −Kx, with a Luenberger observer (green) running in parallel.",
+    "tools": [
+      "MATLAB",
+      "Simulink",
+      "Control System Toolbox",
+      "State-space models",
+      "Pole placement (place)"
+    ],
+    "skills": [
+      "Dynamic modeling and Laplace analysis",
+      "Controllability and observability analysis",
+      "PID and full-state feedback design",
+      "Luenberger observer design",
+      "Actuator saturation and power analysis"
+    ],
+    "links": {
+      "github": "",
+      "video": "",
+      "report": ""
+    },
+    "overview": "A Segway is an inverted pendulum: the upright equilibrium is open-loop unstable, and wheel torque must continuously correct the tilt while the rider's lean commands forward speed. I modeled the coupled tilt and translational dynamics (R = 0.26 m, J = 68.296 kg·m², M + m = 100 kg), showed the tilt transfer function has a right-half-plane pole at s ≈ +3.365, and built a four-state model x = [∫θ, θ, θ̇, ẋ] to verify controllability. I then designed and simulated, in MATLAB and Simulink, a PID-type output-feedback controller, a full-state pole-placement controller with ≈1 s settling time, a reduced three-state controller and Luenberger observers, and studied torque saturation, static gain and actuator power. The full-state design held tilt to about 1° while tracking a rider-lean profile to a 2.72 m/s cruise speed, matching the analytical static gain of 301.846 m/s per metre of lean.",
+    "sections": [
+      {
+        "heading": "Dynamics, transfer functions and state space",
+        "text": [
+          "Starting from the equations of motion Jθ̈ + c₁θ̇ − (MgL + mgℓ)θ = −T + mg·d and (M + m)ẍ + c₂ẋ = T/R, I derived Laplace models from wheel torque T and rider lean d. The tilt dynamics share the denominator 68.296s² + s − 776.38, with poles at +3.365 and −3.379, so the upright Segway is unstable. The velocity channel 1/(26s + 2.6) has a single stable pole at −0.1 from air drag.",
+          "I recast the model as ẋ = Ax + BT + Fd with an integral-of-tilt state, then checked state controllability (rank 4) and output controllability for the three measured outputs ∫θ, θ and θ̇ (rank 3)."
+        ],
+        "bullets": [
+          "Parameters: R = 0.26 m, L = 0.32 m, ℓ = 0.91 m, M = 20 kg, m = 80 kg, c₁ = 1, c₂ = 10",
+          "Gravity term: MgL + mgℓ = 776.38 N·m, giving A(3,2) = 11.367 s⁻²",
+          "Input/disturbance gains: B = [0, 0, −0.01464, 0.03846]ᵀ, F = [0, 0, 11.491, 0]ᵀ"
+        ],
+        "image": {
+          "src": "assets/projects/segway-control/state-space-model.jpg",
+          "caption": "Simulink implementation of ẋ = Ax + Bu from gain and integrator blocks, with state feedback T = −Kx and an observer loop."
+        }
+      },
+      {
+        "heading": "PID output feedback and rider-lean disturbance",
+        "text": [
+          "With the velocity unmeasured, I used T = −(k₁∫θ + k₂θ + k₃θ̇), a PID controller on tilt. I matched the closed-loop characteristic polynomial to poles at −2, −3 and −4, which gave K = [−1639.3, −2552.7, −613.93, 0]. The velocity pole stays at −0.1.",
+          "I modeled rider lean as a trapezoidal profile d(t) that ramps to 0.009 m, holds, and ramps back. I sized it from the steady-state relation ẋss = mg·d/(R·c₂) = 301.8·d so that speed stays under 3 m/s."
+        ],
+        "bullets": [
+          "Tilt peak: ≈ 0.95 × 10⁻³ rad (0.054°), far inside the 10° limit",
+          "Velocity peak: 2.78 m/s during the constant-lean phase",
+          "Limitation: settling time ≈ 40 s, dominated by the uncontrolled −0.1 pole, so the vehicle drifts after the rider stands upright"
+        ],
+        "image": {
+          "src": "assets/projects/segway-control/pid-lean-response.jpg",
+          "caption": "PID response to the trapezoidal lean: tilt stays within ±0.06° while velocity peaks near 2.8 m/s and decays slowly."
+        }
+      },
+      {
+        "heading": "Full-state pole placement and torque saturation",
+        "text": [
+          "With ẋ measurable, I placed the dominant poles at −4 ± 4j (ζ ≈ 0.707, σ = 4 for tₛ ≈ 1 s) and two fast poles at −10 and −12, which gives the characteristic polynomial s⁴ + 30s³ + 328s² + 1664s + 3840. I computed the gains with MATLAB place(). The vehicle now brakes actively and stops precisely when the rider stands up.",
+          "I then inserted a Saturation block between −K and the plant, clipped to 80% of the peak unsaturated torque. When the torque demand peaked during the ramp-down, the controller could no longer overcome the 776.38·θ gravity term and the loop went unstable."
+        ],
+        "bullets": [
+          "Settling: ≈ 1 s, versus ≈ 40 s for the PID design",
+          "Tilt peak: ≈ 1.0°; cruise speed plateaus at ≈ 2.72 m/s",
+          "Static gain: −(A − BK)⁻¹F gives 301.846 m/s per m of lean, confirmed with a unit-step simulation",
+          "80% saturation: θ diverges to ≈ 0.095 rad (5.4°) after t ≈ 11 s and velocity exceeds 7 m/s"
+        ],
+        "image": {
+          "src": "assets/projects/segway-control/full-state-response.jpg",
+          "caption": "Full-state feedback under the same lean profile: ±1° tilt and a flat 2.72 m/s cruise with a sharp stop at t ≈ 30 s."
+        }
+      },
+      {
+        "heading": "Reduced-state control, actuator effort and observers",
+        "text": [
+          "I removed the integral state to get a three-state model [θ, θ̇, ẋ], verified controllability (det C = 0.00009362), and placed poles at −4 ± 4j and −10 (Kr = [−8145.40, −3077.8, −706.69]). Without integral action, tilt held a −0.5° steady offset during cruise and the speed reached only 0.1 m/s.",
+          "Finally, I designed Luenberger observers ė = (A − LC)e for both the four-state and three-state models, with poles at −20 ± 20j, −40, −60 and −20 ± 20j, −50. When I fed the estimated speed back instead of the true speed, the closed-loop response was virtually identical once a brief initial transient decayed, as the separation principle predicts."
+        ],
+        "bullets": [
+          "PID (Task 4): peak torque 7.83 N·m, peak power 61.5 W",
+          "Full-state (Task 5): peak torque 30.78 N·m, peak power 309.6 W",
+          "Reduced-state (Task 8): peak torque 0.79 N·m, peak power 0.31 W"
+        ],
+        "image": {
+          "src": "assets/projects/segway-control/observer-estimate.jpg",
+          "caption": "Four-state observer: estimated velocity converges to the actual velocity in about 0.1 s and the tilt estimation error decays to zero."
+        }
+      }
+    ],
+    "gallery": [
+      {
+        "src": "assets/projects/segway-control/saturation-crash.jpg",
+        "caption": "Torque saturated at 80% of peak: tilt diverges after t ≈ 11 s and forward velocity grows without bound."
+      },
+      {
+        "src": "assets/projects/segway-control/torque-power.jpg",
+        "caption": "Torque and power under identical lean input: the full-state design demands the most actuator effort, up to 30.78 N·m and 309.6 W."
+      },
+      {
+        "src": "assets/projects/segway-control/reduced-state-response.jpg",
+        "caption": "Reduced three-state controller without integral action: −0.5° steady tilt offset and only 0.1 m/s cruise speed."
+      }
     ]
   },
   {
     "id": "smart-irrigation",
     "title": "Smart Irrigation System",
-    "category": "Community-Based Project",
-    "dates": "Feb 2024 – Present",
+    "category": "Community-Based Project · Maynooth University",
+    "dates": "Feb 2024 – May 2024",
+    "role": "Team of 3 · Assembled the prototype and integrated the relay",
     "featured": true,
-    "summary": "An automated irrigation prototype that adjusts watering based on soil moisture and humidity — shaped by interviews with 15 farmers and agricultural experts.",
-    "cover": "assets/projects/smart-irrigation/cover.svg",
-    "coverCaption": "The smart irrigation prototype.",
-    "tools": ["Microcontrollers", "Sensors", "Embedded Systems", "IoT Concepts"],
-    "skills": ["Embedded systems", "Hardware integration", "Requirements gathering", "Research", "Prototyping", "Teamwork"],
+    "summary": "An Arduino Uno closed-loop irrigation controller that fuses soil-moisture and DHT11 humidity readings to switch a water pump through a relay, with live readings on an I2C LCD.",
+    "cover": "assets/projects/smart-irrigation/cover.jpg",
+    "coverCaption": "Final prototype enclosure: Arduino Uno, 2-channel SPDT relay module, breadboard and DC water pump, with the I2C LCD mounted in the lid.",
+    "tools": [
+      "Arduino Uno",
+      "C++ (Arduino)",
+      "Tinkercad",
+      "DHT11",
+      "Soil moisture sensor",
+      "SPDT relay",
+      "I2C LCD"
+    ],
+    "skills": [
+      "Closed-loop control",
+      "Sensor calibration",
+      "Embedded firmware",
+      "Circuit simulation",
+      "Hardware integration and testing",
+      "Community-driven design"
+    ],
     "links": {
       "github": "",
       "video": "",
       "report": ""
     },
-    "overview": "Watering on a fixed schedule wastes water when the soil is already moist and falls short when conditions change. This community-based project makes irrigation respond to what the field actually needs: a prototype that reads soil moisture and humidity and adjusts watering automatically, designed to improve water efficiency and automation in agriculture.",
+    "overview": "Traditional irrigation in Ireland's agricultural sector lacks precision, which wastes water and limits crop health. We designed and built a small-scale smart irrigation system that waters only when the soil needs it. An Arduino Uno reads a resistive soil-moisture sensor and a DHT11 humidity sensor, applies threshold logic with an emergency override, and drives a water pump through an SPDT relay, displaying live moisture and humidity on an I2C LCD. Unlike the single-moisture-sensor design we built on, the controller also uses air humidity. We validated the logic in Tinkercad, characterised each sensor against controlled dry, normal and wet conditions, and confirmed correct relay switching in full-system tests.",
     "sections": [
       {
-        "heading": "Starting with the people who'd use it",
-        "text": "Before choosing any hardware, I conducted user research with 15 farmers and agricultural experts to understand the real-world irrigation challenges they face and what a useful system would need to do. Those conversations shaped the system's requirements.",
-        "image": { "src": "assets/projects/smart-irrigation/research.svg", "caption": "Talking with farmers about their irrigation challenges." }
-      },
-      {
-        "heading": "Designing the system",
+        "heading": "Closed-loop architecture and hardware",
+        "text": "The system is a closed feedback loop: sensor measurements feed the controller, which switches irrigation on and off in real time. The Arduino Uno (ATmega328P, 14 digital I/O, 6 analog inputs) samples the moisture sensor on A0 and the DHT11 on digital pin 8, drives the relay control input HIGH or LOW, and prints readings to a 16×2 LCD over I2C (address 0x27).",
         "bullets": [
-          "Integrated sensors, microcontrollers, and actuators into an automated irrigation control system.",
-          "Researched and selected appropriate electronic components and communication protocols for reliable operation.",
-          "Designed the system to adjust watering automatically based on soil moisture and humidity levels."
+          "Sensing: resistive soil-moisture probe plus DHT11 relative-humidity sensor placed around the target soil.",
+          "Actuation: SPDT relay gates the supply voltage to a DC water pump fed from a water reservoir.",
+          "Display: I2C backpack cuts the LCD wiring to four wires, added after feedback from potential users."
         ],
-        "image": { "src": "assets/projects/smart-irrigation/block-diagram.svg", "caption": "System block diagram: sensors → microcontroller → actuators." }
+        "image": {
+          "src": "assets/projects/smart-irrigation/lcd-live.jpg",
+          "caption": "Live dual readout during the humidifier test: 95.00% relative humidity and 50.40% soil moisture."
+        }
       },
       {
-        "heading": "The prototype",
-        "text": "The working prototype brings sensing, control, and actuation together in one automated system that waters only when the readings show it's needed.",
-        "image": { "src": "assets/projects/smart-irrigation/prototype.svg", "caption": "The working prototype." }
+        "heading": "Control logic validated in simulation",
+        "text": "Before building, we simulated the circuit in Tinkercad. Tinkercad has no pump or DHT11 part, so a DC motor stood in for the pump and a potentiometer emulated humidity. The relay switches on when both moisture and humidity fall below their thresholds. An emergency rule overrides humidity and waters any time the soil is critically dry, which covers the case where the two sensors disagree.",
+        "bullets": [
+          "Simulation thresholds: raw moisture 300, humidity 60%.",
+          "Emergency override: relay forced on when raw moisture drops below 150.",
+          "Verified three cases: moist soil (relay off), dry soil and dry air (relay on), and very dry soil with humid air (emergency on)."
+        ],
+        "image": {
+          "src": "assets/projects/smart-irrigation/tinkercad-sim.jpg",
+          "caption": "Tinkercad model: soil-moisture sensor on A0, potentiometer emulating humidity on A1, relay switching a DC motor from a bench supply."
+        }
       },
       {
-        "heading": "Results & next steps",
-        "text": "✏️ Placeholder — add what you've learned so far, any field-test results (for example, water saved compared with manual watering), and what's next for the project."
+        "heading": "Sensor characterisation",
+        "text": [
+          "We tested each sensor on its own to set the thresholds. Datasheet research suggested the moisture sensor tops out near 950 in water, but repeated tests never exceeded 750, so we normalised readings to percent as raw/750 × 100. Dry, freshly dug and watered soil samples read 6.13%, 42.53% and 92.53%, an 86.4-point span.",
+          "For the DHT11 we sealed the sensor in a box with a hair dryer or a humidifier. Ambient air read 46–52% indoors and 64% outdoors, 1% off the local weather report. The dry box read 18% after about 30 minutes and the humidified box read 95%."
+        ],
+        "image": {
+          "src": "assets/projects/smart-irrigation/moisture-tests.jpg",
+          "caption": "Normalised moisture on the LCD for sun- and hair-dryer-dried soil (6.13%), freshly dug soil (42.53%) and watered soil (92.53%)."
+        }
+      },
+      {
+        "heading": "System integration and testing",
+        "text": "With the measured ranges in hand, we set the final thresholds and tested both sensors together with the relay. The serial log showed the relay holding at 0 while moisture stayed above threshold and switching to 1 once both readings dropped below their limits. We then added the pump and LCD and packed everything into a compact enclosure, because potential users had asked for a smaller unit that is easier to deploy. Integration testing showed that the outlet tube siphoned water by gravity, so the reservoir has to sit below the soil.",
+        "bullets": [
+          "Final thresholds: moisture 30% (raw 225), humidity 70%, emergency moisture 15%.",
+          "Measured moisture range: about 6% (dried soil) to about 90% (freshly soaked soil).",
+          "My role: I assembled the original prototype and integrated the relay that let the Arduino drive the pump."
+        ],
+        "image": {
+          "src": "assets/projects/smart-irrigation/enclosure.jpg",
+          "caption": "Integrated prototype: relay module, Arduino Uno, breadboard and pump inside the enclosure, with the I2C LCD in the lid."
+        }
       }
     ],
     "gallery": [
-      { "src": "assets/projects/smart-irrigation/gallery-1.svg", "caption": "Soil-moisture sensor in the field." },
-      { "src": "assets/projects/smart-irrigation/gallery-2.svg", "caption": "Electronics close-up." },
-      { "src": "assets/projects/smart-irrigation/gallery-3.svg", "caption": "The project team." }
+      {
+        "src": "assets/projects/smart-irrigation/humidity-normal.jpg",
+        "caption": "DHT11 baseline in ambient indoor air: 48.00% relative humidity, within the 46–52% band measured."
+      },
+      {
+        "src": "assets/projects/smart-irrigation/humidity-dry.jpg",
+        "caption": "DHT11 after about 30 minutes in a box dried with a hair dryer: 18.00% relative humidity."
+      }
+    ]
+  },
+  {
+    "id": "speech-signal-analysis",
+    "title": "Speech Signal Analysis",
+    "category": "Signals & Systems Project · Maynooth University",
+    "dates": "Fall 2023",
+    "role": "Individual project",
+    "featured": false,
+    "summary": "A MATLAB study of a recorded speech signal in the time and frequency domains, computing its spectrum with both the FFT and a full-length, centred DFT to expose the harmonic structure the waveform hides.",
+    "cover": "assets/projects/speech-signal-analysis/cover.jpg",
+    "coverCaption": "MATLAB analysis of a recorded utterance: the ~2.6 s time-domain waveform (top) and its single-sided FFT amplitude spectrum, with harmonic peaks concentrated below 1 kHz (bottom).",
+    "tools": [
+      "MATLAB",
+      "FFT",
+      "DFT",
+      "audioread",
+      "Signal Processing"
+    ],
+    "skills": [
+      "Spectral analysis",
+      "Time- vs frequency-domain interpretation",
+      "Speech signal fundamentals",
+      "Algorithmic complexity (O(N²) vs O(N log N))",
+      "Technical report writing"
+    ],
+    "links": {
+      "github": "",
+      "video": "",
+      "report": ""
+    },
+    "overview": "For the EE301 Signals & Systems module I chose speech as the information-bearing signal and studied how to expose the features that distinguish speech sounds. A raw time-domain waveform shows amplitude over time but hides spectral content, so vowels and consonants are hard to separate by eye. I reviewed speech production, time- and frequency-domain analysis, feature extraction (STFT, MFCCs), the DFT, the FFT and convolution, then implemented the analysis in MATLAB: reading a recorded .wav utterance, building time and frequency axes from its sample rate, and computing both a single-sided FFT amplitude spectrum and a two-sided, fftshift-centred DFT. The resulting spectra show the utterance's energy concentrated in a series of harmonic peaks below about 1 kHz, structure that is invisible in the waveform alone.",
+    "sections": [
+      {
+        "heading": "Speech as an Information-Bearing Signal",
+        "text": [
+          "Speech travels from the speaker's brain through the vocal system and air to the listener's auditory system. The vocal tract's shape sets its resonant frequencies, the formants, which are the key cues for identifying phonemes.",
+          "Digitally, speech is a sequence of samples of relative air pressure (PCM). Its amplitude and frequency content change rapidly over short time spans, so useful features have to be extracted from the signal, not read directly off it."
+        ],
+        "bullets": [
+          "Formants: vocal-tract resonances that characterise vowels.",
+          "PCM: speech stored as a sampled pressure sequence.",
+          "Non-stationary: amplitude and spectrum vary over milliseconds."
+        ]
+      },
+      {
+        "heading": "Why the Time Domain Is Not Enough",
+        "text": [
+          "A time-versus-amplitude plot shows how the signal's energy evolves, but vowels and consonants overlap in frequency and the waveform carries no explicit spectral information. That makes it hard to tell speech sounds apart.",
+          "In the frequency domain the distribution of energy across bands becomes visible. A spectrogram shows the frequencies present in each short window, so vowels, stops, nasals and fricatives take on distinct patterns."
+        ],
+        "bullets": [
+          "STFT: spectra over short, overlapping windows give a time-frequency view.",
+          "MFCCs: short-term power spectrum on the mel scale, the standard speech-recognition feature."
+        ],
+        "image": {
+          "src": "assets/projects/speech-signal-analysis/time-domain.jpg",
+          "caption": "Time-domain waveform of the recorded utterance, with the voiced segment peaking near 1.0–1.3 s."
+        }
+      },
+      {
+        "heading": "DFT and FFT",
+        "text": [
+          "The DFT maps N discrete samples x[n] onto N analysis frequencies, giving the amplitude and phase of the component sinusoids. It also links a system's impulse response to its frequency response.",
+          "The FFT computes the same transform by repeatedly splitting it into even- and odd-indexed halves and using the symmetry of the complex exponentials. This cuts the cost from O(N²) to O(N log₂N)."
+        ],
+        "bullets": [
+          "Direct DFT: work grows as N².",
+          "FFT: work grows as N log₂N, a ratio of about 100 for N = 1024 (100 s becomes about 1 s).",
+          "Convolution: output is the sum of scaled, shifted impulse responses, and the FFT makes it fast."
+        ],
+        "image": {
+          "src": "assets/projects/speech-signal-analysis/fft-spectrum.jpg",
+          "caption": "Single-sided FFT amplitude spectrum showing harmonic peaks below 500 Hz and little energy above 1 kHz."
+        }
+      },
+      {
+        "heading": "MATLAB Implementation and Results",
+        "text": [
+          "I wrote two MATLAB scripts. Each reads a recorded utterance with audioread, builds the time vector t = n/Fs, and computes the spectrum with fft. The first builds the single-sided amplitude spectrum: it normalises by N and doubles the non-DC bins. The second also computes an N-point DFT, centres it with fftshift on a −Fs/2 to Fs/2 axis, and plots the waveform, the FFT and the DFT together.",
+          "Both views agree. Most of the utterance's energy sits in a series of distinct harmonic peaks below about 500 Hz, with little above about 1 kHz. The two-sided DFT is mirrored about 0 Hz, as expected for a real-valued signal."
+        ],
+        "bullets": [
+          "Input: a single recorded .wav utterance of about 2.6 s.",
+          "Single-sided spectrum: P1 = 2|Y/N| over 0 to Fs/2.",
+          "Two-sided DFT: fftshift(fft(signal, N)) on a bin spacing of Fs/N."
+        ],
+        "image": {
+          "src": "assets/projects/speech-signal-analysis/fft-vs-dft.jpg",
+          "caption": "MATLAB output: the time-domain waveform, the single-sided FFT spectrum and the fftshift-centred two-sided DFT of the same utterance."
+        }
+      }
+    ],
+    "gallery": [
+      {
+        "src": "assets/projects/speech-signal-analysis/dft-two-sided.jpg",
+        "caption": "Two-sided DFT magnitude centred with fftshift, symmetric about 0 Hz as expected for a real signal."
+      }
     ]
   },
   {
@@ -112,12 +421,23 @@
     "category": "Power Electronics Project",
     "dates": "Jan 2023 – May 2023",
     "role": "Team lead · 6 students",
-    "featured": true,
+    "featured": false,
     "summary": "Led a team of six to design and simulate a DC–DC converter for a solar-powered EV charging station concept — from business plan to circuit simulation.",
     "cover": "assets/projects/ev-solar-dc-dc-converter/cover.svg",
     "coverCaption": "EV solar charging station concept.",
-    "tools": ["MATLAB", "LTSpice", "Power Electronics", "Circuit Simulation"],
-    "skills": ["Leadership", "Power electronics design", "Circuit simulation", "Technical documentation", "Teamwork"],
+    "tools": [
+      "MATLAB",
+      "LTSpice",
+      "Power Electronics",
+      "Circuit Simulation"
+    ],
+    "skills": [
+      "Leadership",
+      "Power electronics design",
+      "Circuit simulation",
+      "Technical documentation",
+      "Teamwork"
+    ],
     "links": {
       "github": "",
       "video": "",
@@ -132,17 +452,26 @@
           "Developed a business plan and a product concept report.",
           "Wrote the technical specifications for the converter."
         ],
-        "image": { "src": "assets/projects/ev-solar-dc-dc-converter/team.svg", "caption": "The project team." }
+        "image": {
+          "src": "assets/projects/ev-solar-dc-dc-converter/team.svg",
+          "caption": "The project team."
+        }
       },
       {
         "heading": "Design & simulation",
         "text": "We designed the converter circuit and simulated it in MATLAB and LTSpice to check how it behaves before any hardware is built.",
-        "image": { "src": "assets/projects/ev-solar-dc-dc-converter/schematic.svg", "caption": "Converter schematic in LTSpice." }
+        "image": {
+          "src": "assets/projects/ev-solar-dc-dc-converter/schematic.svg",
+          "caption": "Converter schematic in LTSpice."
+        }
       },
       {
         "heading": "Efficiency & power quality",
         "text": "Using the simulation results, we performed efficiency and power-quality analysis on the system.",
-        "image": { "src": "assets/projects/ev-solar-dc-dc-converter/analysis.svg", "caption": "Simulated waveforms and efficiency analysis." }
+        "image": {
+          "src": "assets/projects/ev-solar-dc-dc-converter/analysis.svg",
+          "caption": "Simulated waveforms and efficiency analysis."
+        }
       },
       {
         "heading": "Results",
@@ -150,9 +479,158 @@
       }
     ],
     "gallery": [
-      { "src": "assets/projects/ev-solar-dc-dc-converter/gallery-1.svg", "caption": "MATLAB model." },
-      { "src": "assets/projects/ev-solar-dc-dc-converter/gallery-2.svg", "caption": "Charging station concept sketch." },
-      { "src": "assets/projects/ev-solar-dc-dc-converter/gallery-3.svg", "caption": "Product concept report." }
+      {
+        "src": "assets/projects/ev-solar-dc-dc-converter/gallery-1.svg",
+        "caption": "MATLAB model."
+      },
+      {
+        "src": "assets/projects/ev-solar-dc-dc-converter/gallery-2.svg",
+        "caption": "Charging station concept sketch."
+      },
+      {
+        "src": "assets/projects/ev-solar-dc-dc-converter/gallery-3.svg",
+        "caption": "Product concept report."
+      }
+    ]
+  },
+  {
+    "id": "roboeireann",
+    "title": "RoboEireann",
+    "category": "Robotics Team · Maynooth University",
+    "dates": "",
+    "role": "Team member",
+    "featured": false,
+    "summary": "Maynooth University's RoboCup team, which plays fully autonomous robot soccer with NAO humanoid robots in the Standard Platform League. Ireland's only representative at RoboCup.",
+    "cover": "assets/projects/roboeireann/cover.svg",
+    "coverCaption": "RoboEireann's NAO humanoid robots on the Standard Platform League field.",
+    "tools": [
+      "NAO humanoid",
+      "C++",
+      "B-Human framework",
+      "RoboCup SPL"
+    ],
+    "skills": [
+      "Autonomous humanoid robotics",
+      "Robot perception",
+      "Multi-robot teamwork",
+      "Competition engineering"
+    ],
+    "links": {
+      "github": "",
+      "video": "",
+      "report": ""
+    },
+    "overview": "RoboEireann is Maynooth University's robot soccer team. It draws members from the Departments of Electronic Engineering and Computer Science and from the Hamilton Institute, and it competes in the RoboCup Standard Platform League (SPL). In the SPL every team plays on identical NAO humanoid robots, so a match comes down to software: each robot has to perceive the field, localise itself, choose an action and walk stably with no human control. Maynooth's RoboCup history goes back to 2008, when it was part of NUManoids, a joint team with the University of Newcastle, Australia, that won the league in the first year the NAO platform was used. Under the RoboEireann name, the team won the Challenge Shield at RoboCup 2023 in Bordeaux, scoring 67 goals and conceding 2 over nine matches. ✏️ Placeholder — Kamsi, add your role on the team, the years you were involved, and the module or work you contributed (e.g. vision, localisation, behaviour, motion, tooling, or competition logistics).",
+    "sections": [
+      {
+        "heading": "The Platform: NAO in the Standard Platform League",
+        "text": [
+          "The SPL replaced Sony's AIBO with the NAO humanoid, first made by Aldebaran, after Sony stopped making the AIBO in 2006. Teams may not modify the hardware. A robot has to play from its own onboard cameras, joint sensors and processor, so any edge a team has comes from its software.",
+          "The work splits into the usual autonomy stack, all running in real time on embedded hardware with limited compute."
+        ],
+        "bullets": [
+          "Perception: find the ball, field lines, goals and other robots in camera images, and recognise referee signals.",
+          "Localisation: estimate the robot's position on a symmetric field from noisy landmark observations.",
+          "Behaviour: choose roles and actions for each robot and coordinate the team.",
+          "Motion: keep a fast, stable biped walk going and kick while under contact and disturbances."
+        ],
+        "image": {
+          "src": "assets/projects/roboeireann/platform.svg",
+          "caption": "The NAO humanoid, the single shared hardware platform of the RoboCup Standard Platform League."
+        }
+      },
+      {
+        "heading": "Software Stack",
+        "text": "In early 2022 the team adopted the 2021 B-Human code release as the base of its software, and it builds its own modules on top. According to the team's 2026 team description paper, the current stack is:",
+        "bullets": [
+          "Robot detection: a modified YOLO-based object detector that finds teammates and opponents.",
+          "Referee recognition: a MobileNet-based classifier for visual referee signals.",
+          "Localisation: a multi-hypothesis Unscented Kalman Filter, from the underlying B-Human framework.",
+          "Locomotion: the walking engine from the B-Human 2021 release."
+        ],
+        "image": {
+          "src": "assets/projects/roboeireann/gallery-2.svg",
+          "caption": "Robot camera view with detections overlaid, as used for debugging perception."
+        }
+      },
+      {
+        "heading": "Competition Record",
+        "text": "The team has competed at European and international RoboCup events since 2009. Highlights reported by the team and the university:",
+        "bullets": [
+          "RoboCup 2008: league winner as part of NUManoids, the joint Maynooth and University of Newcastle team.",
+          "RoboCup German Open 2012: second place.",
+          "RoboCup 2013: quarter-finalist.",
+          "RoboCup 2023, Bordeaux: Challenge Shield winner, 67–2 on goals over nine matches against teams from Germany, the Netherlands, Canada, the USA, Australia and Brazil."
+        ],
+        "image": {
+          "src": "assets/projects/roboeireann/competition.svg",
+          "caption": "RoboEireann robots playing a match at a RoboCup event."
+        }
+      }
+    ],
+    "gallery": [
+      {
+        "src": "assets/projects/roboeireann/gallery-1.svg",
+        "caption": "RoboEireann team members during a development session."
+      }
+    ]
+  },
+  {
+    "id": "roborave",
+    "title": "RoboRAVE",
+    "category": "Robotics Competition",
+    "dates": "2017 – 2018",
+    "role": "Competitor",
+    "featured": false,
+    "summary": "International student robotics competition (Robots Are Very Educational) where teams design, build and program robots for set challenges.",
+    "cover": "assets/projects/roborave/cover.svg",
+    "coverCaption": "My robot at RoboRAVE.",
+    "tools": [
+      "Microcontroller",
+      "Sensors",
+      "DC motors"
+    ],
+    "skills": [
+      "Robot design and build",
+      "Embedded programming",
+      "Sensor-based control",
+      "Teamwork under competition constraints"
+    ],
+    "links": {
+      "github": "",
+      "video": "",
+      "report": ""
+    },
+    "overview": "RoboRAVE (Robots Are Very Educational) is an international robotics competition. It started in New Mexico with 25 high-school students and a few teachers, and it is run by Inquiry Facilitators, a STEM education non-profit. The international event is held each year in Albuquerque, and recent editions have drawn more than 350 teams and over 1,000 participants from six countries. Teams of two to four students design, build and program robots for fixed challenges. The robots can be autonomous, remote-controlled or both, and teams compete in four levels: elementary, middle school, high school and 'Big Kids' (beyond high school). I competed in 2017 and 2018. ✏️ Placeholder — Kamsi, add which RoboRAVE event(s) you attended, the challenge(s) you competed in, the robot you built (controller, sensors, drive), and your results.",
+    "sections": [
+      {
+        "heading": "The Challenges",
+        "text": "Each RoboRAVE challenge has a fixed course and scoring rules, and it rewards a reliable, well-tuned robot more than raw complexity. The challenges include:",
+        "bullets": [
+          "Line Following: follow a line to a tower, handle an intersection, deliver a ping-pong ball and return home, all within about three minutes.",
+          "SumoBot: push the opposing robot off an elevated ring.",
+          "Fire Fighting and Jousting: further autonomous, task-specific challenges.",
+          "Others: A-MAZE-ing, Alpine Bot, Lighter Than Air Vehicles, an innovative-robot category, RoboEthics and an entrepreneurial challenge."
+        ],
+        "image": {
+          "src": "assets/projects/roborave/challenge.svg",
+          "caption": "Robot running on a RoboRAVE challenge course."
+        }
+      },
+      {
+        "heading": "My Robot",
+        "text": "✏️ Placeholder — Kamsi, describe the robot you built: the challenge it was designed for, the microcontroller and sensors, the drive system, the control approach (e.g. line-sensor feedback, edge detection) and what you changed between 2017 and 2018.",
+        "image": {
+          "src": "assets/projects/roborave/build.svg",
+          "caption": "Robot build: chassis, drive motors, sensors and controller."
+        }
+      }
+    ],
+    "gallery": [
+      {
+        "src": "assets/projects/roborave/gallery-1.svg",
+        "caption": "Our team at RoboRAVE."
+      }
     ]
   }
 ]
