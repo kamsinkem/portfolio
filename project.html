@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- ✏️ EDIT: your name and a one-line description (shown in Google results and link previews) -->
-  <title>Project | Your Name</title>
+  <title>Project | Kamsi Nkem</title>
   <meta name="description" content="Project details.">
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-  <meta property="og:title" content="Your Name — Robotics Engineer">
+  <meta property="og:title" content="Kamsi Nkem — Robotics Engineer">
   <meta property="og:description" content="M.S. Robotics, Northeastern University.">
   <meta property="og:image" content="assets/images/profile.jpg">
   <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
@@ -38,8 +38,11 @@
 
   <header class="nav" id="nav">
     <nav class="nav-inner" aria-label="Primary">
-      <!-- ✏️ EDIT: your name -->
-      <a class="nav-logo" href="./#home">Your Name</a>
+      <!-- ✏️ EDIT: your initials, name, and title -->
+      <a class="nav-logo" href="./#home" aria-label="Kamsi Nkem — home">
+        <span class="logo-badge" aria-hidden="true">KN.</span>
+        <span class="logo-text"><strong>Kamsi Nkem</strong><small>Robotics &amp; Controls</small></span>
+      </a>
 
       <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="nav-menu">
         <span></span><span></span>
@@ -47,7 +50,6 @@
 
       <ul class="nav-links" id="nav-menu">
         <li><a href="./#home" data-nav="home">Home</a></li>
-        <li><a href="./#about" data-nav="about">About</a></li>
         <li class="has-dropdown">
           <a href="projects.html" data-nav="projects">Projects
             <svg class="nav-caret" viewBox="0 0 12 12" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="m3 4.5 3 3 3-3"/></svg>
@@ -60,14 +62,15 @@
             </div>
           </div>
         </li>
-        <li><a href="./#contact" data-nav="contact">Contact</a></li>
+        <li><a href="about.html" data-nav="about">About</a></li>
         <li>
           <!-- ✏️ EDIT: your GitHub URL -->
-          <a class="nav-icon" href="https://github.com/YOUR-USERNAME" target="_blank" rel="noopener" aria-label="GitHub">
+          <a class="nav-icon" href="https://github.com/kamsinkem" target="_blank" rel="noopener" aria-label="GitHub">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.4-5.27 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
             <span class="nav-icon-label">GitHub</span>
           </a>
         </li>
+        <li><a class="nav-cta" href="./#contact" data-nav="contact">Let's connect <span aria-hidden="true">↗</span></a></li>
       </ul>
     </nav>
   </header>
@@ -90,7 +93,7 @@
   <footer class="footer">
     <div class="container footer-inner">
       <!-- ✏️ EDIT: your name -->
-      <p>© <span data-year></span> Your Name. Built in Boston.</p>
+      <p>© <span data-year></span> Kamsi Nkem. Built in Boston.</p>
       <a href="#main">Back to top ↑</a>
     </div>
   </footer>

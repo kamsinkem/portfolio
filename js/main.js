@@ -114,7 +114,7 @@
     });
 
     if (page !== 'home') {
-      setActive('projects');
+      setActive(page === 'about' ? 'about' : 'projects');
       return;
     }
 
@@ -388,6 +388,7 @@
     // Load-in: portrait rises (home), rule draws, then header text fades + scales in
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     if ($('.hero-portrait img')) tl.fromTo('.hero-portrait img', { opacity: 0, y: 80 }, { opacity: 1, y: 0, duration: 1.6 }, 0);
+    if ($('.hero-scan')) tl.fromTo('.hero-scan', { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 2.2, ease: 'power2.out' }, 0.2);
     if ($('.hero-rule')) tl.fromTo('.hero-rule', { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.9 }, 0.25);
     if ($('[data-hero]:not(.hero-rule)')) {
       tl.fromTo('[data-hero]:not(.hero-rule)',
@@ -426,7 +427,7 @@
       });
     });
 
-    parallaxImages('.about-photo img');
+    parallaxImages('.story-media img');
   }
 
   function splitLines(node, text) {
@@ -449,6 +450,148 @@
       node.append(el('span', { class: 'line' }, [inner]));
       return inner;
     });
+  }
+
+  /* ---------------- Hero: live LiDAR-style scan behind the portrait ----------------
+     Range rings, a rotating sweep beam, a "point cloud" that lights up as the beam
+     passes, a planned path with a moving robot, and a tracked target. Kept faint so it
+     never competes with the text or the photo. Pauses when off-screen; with reduced
+     motion it draws a single still frame. */
+  function initHeroScan() {
+    const canvas = $('#hero-scan');
+    if (!canvas || !canvas.getContext) return;
+    const ctx = canvas.getContext('2d');
+    const TEAL = '94, 234, 212';
+    const BLUE = '124, 196, 255';
+    const TAU = Math.PI * 2;
+    const MONO = 'ui-monospace, "SF Mono", Menlo, Consolas, monospace';
+    let w = 0, h = 0, angle = -Math.PI / 2, last = 0, raf = 0, visible = false;
+
+    // Seeded random numbers so the "environment" looks the same on every visit.
+    let seed = 11;
+    const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+    // Point cloud in polar coordinates (r in units of the outer ring radius).
+    const points = [];
+    for (let i = 0; i < 9; i++) { // wall-like arcs
+      const a0 = rand() * TAU, len = 0.25 + rand() * 0.6, r0 = 0.45 + rand() * 0.45, bend = (rand() - 0.5) * 0.25;
+      const n = 14 + Math.floor(rand() * 16);
+      for (let j = 0; j < n; j++) {
+        const t = j / n;
+        points.push({ a: a0 + t * len, r: Math.min(0.97, r0 + bend * t + (rand() - 0.5) * 0.015) });
+      }
+    }
+    for (let i = 0; i < 70; i++) points.push({ a: rand() * TAU, r: 0.2 + rand() * 0.78 }); // scattered returns
+
+    // Planned path (x, y in units of the radius; y points down), shown upper-left of the portrait.
+    const path = [[-0.28, -0.56], [-0.46, -0.64], [-0.6, -0.5], [-0.77, -0.52], [-0.86, -0.3], [-0.8, -0.06]];
+    const segLen = path.slice(1).map((p, i) => Math.hypot(p[0] - path[i][0], p[1] - path[i][1]));
+    const pathLen = segLen.reduce((a, b) => a + b, 0);
+    const target = { x: 0.5, y: -0.62 };
+    const targetAngle = Math.atan2(target.y, target.x);
+
+    const since = (a) => { let d = (angle - a) % TAU; return d < 0 ? d + TAU : d; }; // how long ago the beam passed angle a
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = canvas.clientWidth; h = canvas.clientHeight; // layout size, ignores the load-in scale animation
+      canvas.width = Math.max(1, Math.round(w * dpr));
+      canvas.height = Math.max(1, Math.round(h * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function draw(time) {
+      const cx = w / 2, cy = h / 2, R = Math.min(w, h) / 2 * 0.96;
+      ctx.clearRect(0, 0, w, h);
+      ctx.lineWidth = 1;
+
+      // Range rings, crosshair, and compass ticks
+      [0.32, 0.55, 0.78, 1].forEach((f, i) => {
+        ctx.strokeStyle = `rgba(${TEAL}, ${i === 3 ? 0.14 : 0.07})`;
+        ctx.beginPath(); ctx.arc(cx, cy, R * f, 0, TAU); ctx.stroke();
+      });
+      ctx.strokeStyle = `rgba(${TEAL}, 0.05)`;
+      ctx.beginPath(); ctx.moveTo(cx - R, cy); ctx.lineTo(cx + R, cy); ctx.moveTo(cx, cy - R); ctx.lineTo(cx, cy + R); ctx.stroke();
+      for (let i = 0; i < 120; i++) {
+        const a = (i / 120) * TAU, major = i % 10 === 0, r1 = R * (major ? 0.955 : 0.977);
+        ctx.strokeStyle = `rgba(${TEAL}, ${major ? 0.3 : 0.12})`;
+        ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1); ctx.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R); ctx.stroke();
+      }
+
+      // Sweep beam: a soft wedge trailing a bright leading edge
+      const SPAN = 0.9;
+      if (ctx.createConicGradient) {
+        const g = ctx.createConicGradient(angle - SPAN, cx, cy);
+        const f = SPAN / TAU;
+        g.addColorStop(0, `rgba(${TEAL}, 0)`);
+        g.addColorStop(f, `rgba(${TEAL}, 0.15)`);
+        g.addColorStop(Math.min(1, f + 0.001), `rgba(${TEAL}, 0)`);
+        g.addColorStop(1, `rgba(${TEAL}, 0)`);
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, angle - SPAN, angle); ctx.closePath(); ctx.fill();
+      } else {
+        for (let i = 0; i < 18; i++) {
+          ctx.fillStyle = `rgba(${TEAL}, ${0.012 * (i / 18)})`;
+          ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, angle - SPAN + (SPAN * i) / 18, angle); ctx.closePath(); ctx.fill();
+        }
+      }
+      ctx.strokeStyle = `rgba(${TEAL}, 0.4)`;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(angle) * R, cy + Math.sin(angle) * R); ctx.stroke();
+
+      // Point cloud: each return glows when the beam hits it, then fades
+      for (const p of points) {
+        const alpha = 0.05 + Math.exp(-since(p.a) * 1.1) * 0.75;
+        ctx.fillStyle = `rgba(${TEAL}, ${alpha.toFixed(3)})`;
+        ctx.fillRect(cx + Math.cos(p.a) * p.r * R - 1, cy + Math.sin(p.a) * p.r * R - 1, 2, 2);
+      }
+
+      // Planned path with waypoints and a robot moving along it
+      ctx.setLineDash([4, 6]);
+      ctx.strokeStyle = `rgba(${BLUE}, 0.35)`;
+      ctx.beginPath();
+      path.forEach(([x, y], i) => (i ? ctx.lineTo(cx + x * R, cy + y * R) : ctx.moveTo(cx + x * R, cy + y * R)));
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.strokeStyle = `rgba(${BLUE}, 0.45)`;
+      path.forEach(([x, y]) => { ctx.beginPath(); ctx.arc(cx + x * R, cy + y * R, 2.5, 0, TAU); ctx.stroke(); });
+      let d = ((time * 0.06) % 1) * pathLen, k = 0;
+      while (k < segLen.length - 1 && d > segLen[k]) { d -= segLen[k]; k++; }
+      const t = Math.min(1, d / segLen[k]);
+      const rx = cx + (path[k][0] + (path[k + 1][0] - path[k][0]) * t) * R;
+      const ry = cy + (path[k][1] + (path[k + 1][1] - path[k][1]) * t) * R;
+      ctx.fillStyle = `rgba(${BLUE}, 0.15)`; ctx.beginPath(); ctx.arc(rx, ry, 9, 0, TAU); ctx.fill();
+      ctx.fillStyle = `rgba(${BLUE}, 0.9)`; ctx.beginPath(); ctx.arc(rx, ry, 3.2, 0, TAU); ctx.fill();
+
+      // Tracked target: corner brackets that flash when the beam passes
+      const tx = cx + target.x * R, ty = cy + target.y * R, s = R * 0.07, c = s * 0.45;
+      const ta = 0.25 + Math.exp(-since(targetAngle) * 1.5) * 0.6;
+      ctx.strokeStyle = `rgba(${TEAL}, ${ta.toFixed(3)})`;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) => {
+        ctx.moveTo(tx + sx * s, ty + sy * s - sy * c); ctx.lineTo(tx + sx * s, ty + sy * s); ctx.lineTo(tx + sx * s - sx * c, ty + sy * s);
+      });
+      ctx.stroke();
+      ctx.lineWidth = 1;
+      ctx.fillStyle = `rgba(${TEAL}, ${(ta * 0.8).toFixed(3)})`;
+      ctx.font = `600 10px ${MONO}`;
+      ctx.fillText('OBJ · 2.4 m', tx - s, ty + s + 16);
+    }
+
+    function frame(now) {
+      const dt = last ? Math.min((now - last) / 1000, 0.05) : 0;
+      last = now;
+      angle = (angle + dt * 0.55) % TAU;
+      draw(now / 1000);
+      raf = visible && !document.hidden ? requestAnimationFrame(frame) : 0;
+    }
+    const start = () => { if (!raf && !reduceMotion) { last = 0; raf = requestAnimationFrame(frame); } };
+
+    resize();
+    if (reduceMotion) { angle = -0.35; draw(8); }
+    new ResizeObserver(() => { resize(); if (reduceMotion || !raf) draw(8); }).observe(canvas);
+    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (visible) start(); }).observe(canvas);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && visible) start(); });
   }
 
   /* ---------------- Contact form (Formspree) ---------------- */
@@ -492,6 +635,7 @@
   $$('[data-year]').forEach((n) => { n.textContent = new Date().getFullYear(); });
   initNav();
   initForm();
+  initHeroScan();
   initAnimations();
 
   getProjects()

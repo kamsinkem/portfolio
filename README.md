@@ -8,7 +8,8 @@ A clean, Apple-style personal website. Plain HTML, CSS, and JavaScript — no bu
 
 ```
 portfolio/
-├── index.html              ← home page (hero, about, featured projects, resume, contact)
+├── index.html              ← home page (hero, featured projects, resume, contact)
+├── about.html              ← About page ("Who am I?" and "My Journey")
 ├── projects.html           ← "all projects" page (cards are built automatically)
 ├── project.html            ← ONE template that shows any project's details page
 ├── css/style.css           ← all the styling (colors are at the very top)
@@ -166,16 +167,66 @@ That's it — both the **View** and **Download** buttons point to that file.
 
 ## 4. Edit your bio and personal info
 
-All in `index.html` — search for `✏️ EDIT`:
+Search for `✏️ EDIT` in these files:
 
-- **Name** — in the `<title>`, the nav logo, the front-page headline, the photo descriptions (`alt="Portrait of Your Name"`), the About heading ("Hello, I'm…"), and the footer. Searching `index.html` for **Your Name** finds them all.
-- **Headline** — "I'm Your Name, a Robotics Engineer" on the front page.
-- **Tagline** — the line under the headline on the front page.
-- **Bio** — the paragraphs marked `data-lines` in the About section. Change the text between `<p …>` and `</p>`. Add a paragraph by copying one of the `<p class="bio" data-lines>…</p>` lines. Keep bio paragraphs as plain text (no links) so the line-by-line animation works.
-- **Quick facts** — Education / Focus / Based in, just below the bio.
-- **Email, LinkedIn, GitHub** — in the Contact section *and* the GitHub icon in the nav. Replace every `YOUR-USERNAME` (search the file for it) and `you@northeastern.edu`.
+- **`index.html` (home page)**
+  - **Headline:** "Hi, I'm Kamsi Nkem. I build robots that sense, plan & move." The words inside `<em class="grad">…</em>` get the teal-to-blue color.
+  - **Intro sentence:** the line under the headline. Words inside `<strong>…</strong>` show in bold white.
+  - **Email and LinkedIn:** in the Contact section. Replace `you@northeastern.edu` and `YOUR-USERNAME` in the LinkedIn link.
+- **`about.html` (About page)**
+  - **Who am I?** and **My Journey:** change the text between `<p>` and `</p>`. Copy a whole `<p>…</p>` line to add a paragraph, or delete one to remove it. Replace every **✏️ Placeholder** sentence with your own words.
+  - **Quick facts:** Education / Focus / Based in.
+  - **Photos:** `assets/images/about-who.svg` and `assets/images/about-journey.svg`. See section 3 to swap them.
+- **Name, logo, and links in the top menu:** these appear on all four pages (`index.html`, `about.html`, `projects.html`, `project.html`). The badge text is `KN.` and the subtitle is `Robotics &amp; Controls`. If you change them, change them in all four files.
 
-**Colors:** open `css/style.css`. The top of the file has `--accent` (the blue) and others for light mode, and a second block below it for dark mode.
+**Colors:** open `css/style.css`. The top of the file has `--accent` (the blue used for buttons) and `--brand` (the teal) for light mode, then a second block for dark mode.
+
+---
+
+## 4b. ⭐ Editing everything on GitHub.com (no software needed)
+
+You can do every update right on the GitHub website, from any computer. Your site re-publishes itself 1–2 minutes after each change.
+
+### Change text in any file
+
+1. Go to **https://github.com/kamsinkem/portfolio**.
+2. Click the file you want, for example `content` → `projects.json`, or `about.html`.
+3. Click the **✏️ pencil icon** (top right of the file). It says "Edit this file" when you hover over it.
+4. Make your changes.
+5. Click the green **Commit changes…** button (top right), then **Commit changes** again in the pop-up.
+6. Wait 1–2 minutes, then hard-refresh your site (**Ctrl + Shift + R**, or **Cmd + Shift + R** on Mac).
+
+### Upload photos
+
+1. On the repo page, click into the folder the photo belongs in. For example, `assets` → `projects` → `smart-irrigation`.
+2. Click **Add file** (top right) → **Upload files**.
+3. Drag your photos onto the page. Name them simply, with no spaces, for example `prototype.jpg`.
+4. Click **Commit changes**.
+5. Open `content/projects.json` (pencil icon) and change the matching path. For example, change
+   `"assets/projects/smart-irrigation/prototype.svg"` to `"assets/projects/smart-irrigation/prototype.jpg"`. Commit.
+
+**Shortcut:** if you give your photo the *exact same name* as the file it replaces (same name *and* same ending, like `profile.jpg`), you only need step 1–4. Nothing else needs changing.
+
+### Add a photo folder for a brand-new project
+
+GitHub can't make an empty folder, but uploading creates one:
+1. Go into `assets/projects/` and click **Add file → Upload files**.
+2. Drag the **whole folder** from your computer (e.g. a folder called `drone-swarm` with your photos inside) onto the page. GitHub keeps the folder name.
+3. Click **Commit changes**, then add the project to `projects.json` (see section 1).
+
+### Delete a file
+
+Open the file → click the **⋯** menu (top right) → **Delete file** → **Commit changes**.
+
+### Bigger edits: the in-browser editor
+
+On the repo page, press the **`.`** (period) key on your keyboard. A full code editor (VS Code) opens in your browser with every file in a sidebar, which is handy for editing several files at once. When you're done, click the **Source Control** icon on the left (it looks like a branch), type a short message, and click **Commit & Push**.
+
+### If something breaks
+
+- **Projects disappear / "Couldn't load projects":** there's a typo in `projects.json`. Paste the whole file into [jsonlint.com](https://jsonlint.com) and it shows the bad line. Usually it's a missing comma or quote.
+- **Undo a change:** open the file → click **History** (top right) → pick the last good version → copy its text back in. Or just ask Claude to fix it.
+- **Check publishing:** the **Actions** tab shows a ✅ when your site is updated, and a ❌ if something failed.
 
 ---
 
