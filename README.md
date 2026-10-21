@@ -245,31 +245,41 @@ Until you do this, the form politely says it isn't connected yet.
 
 ## 6. Put it online with GitHub Pages
 
-### First time
+### What this means, in plain words
 
-1. **Create a repository.** On github.com, click **+** (top right) → **New repository**.
-   - Name it **`YOUR-USERNAME.github.io`** (with your real GitHub username) to get the clean address `https://YOUR-USERNAME.github.io`.
-     Any other name (e.g. `portfolio`) also works; your site will be at `https://YOUR-USERNAME.github.io/portfolio/`.
-   - Set it to **Public**. Don't add a README (you already have one). Click **Create repository**.
-2. **Upload the files.** On the new repo page, click **uploading an existing file**. Drag in the *contents* of the `portfolio` folder (so `index.html` sits at the top level of the repo, not inside a subfolder). Click **Commit changes**.
-   - Heads-up: the browser uploader may skip `.nojekyll` because its name starts with a dot. If it's missing, click **Add file → Create new file**, name it `.nojekyll`, leave it empty, and commit.
-   - If you use git instead: `git init`, `git add .`, `git commit -m "First version"`, `git branch -M main`, `git remote add origin https://github.com/YOUR-USERNAME/YOUR-REPO.git`, `git push -u origin main`.
-3. **Turn on Pages.** In the repo:
-   - Click **Settings** (the tab with the gear, top of the repo).
-   - In the left sidebar, click **Pages** (under "Code and automation").
-   - Under **Build and deployment → Source**, choose **Deploy from a branch**.
-   - Under **Branch**, choose **`main`** and folder **`/ (root)`**, then click **Save**.
-4. Wait 1–2 minutes and refresh the Pages settings screen. A box at the top will say **"Your site is live at …"** with the link. You can also watch progress in the repo's **Actions** tab.
+Your website is just a folder of files: HTML, CSS, JavaScript, and images. To be visible on the internet, those files have to live on a computer that's always on and connected, which is called a **web server** or **host**.
+
+**GitHub** is where your files are *stored* (your "repository", the `kamsinkem/portfolio` page on github.com). **GitHub Pages** is a free feature of GitHub that also *hosts* those files as a real website. Once it's switched on, GitHub takes whatever is in your repository and shows it at a public address:
+
+> **https://kamsinkem.github.io/portfolio/**
+
+So "putting it online with GitHub Pages" means **flipping one switch in your repository's settings**, so GitHub serves your files to anyone who visits that link.
+
+- **Is it free?** Yes, for public repositories.
+- **Do I need to do this again?** No, only once. After that, every time you change a file on GitHub (or Claude pushes an update), the website updates itself within 1–2 minutes. This automatic re-publishing is called **deploying**.
+- **Where do I see that it worked?** In your repository, click the **Actions** tab. A green ✅ means the latest version is live; a yellow dot means it's still publishing.
+
+### ✅ Your site is already set up
+
+Your files are already in `kamsinkem/portfolio`. If you haven't switched Pages on yet, do this once:
+
+1. Go to **https://github.com/kamsinkem/portfolio**.
+2. Click **⚙️ Settings**. It's the last tab along the top of the repository, *not* your account settings.
+3. In the left menu, click **Pages**.
+4. Under **Build and deployment → Source**, choose **Deploy from a branch**.
+5. Under **Branch**, choose **`main`**, leave the folder as **`/ (root)`**, and click **Save**.
+6. Wait 1–2 minutes and refresh that page. A box at the top says **"Your site is live at …"** with a **Visit site** button.
+
+> **Words you'll see:** a **repository** (or "repo") is your project's folder on GitHub. A **branch** is a version of that folder; `main` is the official one the website is built from. A **commit** is a saved change (like pressing "Save" with a short note).
 
 ### Updating later
 
-Edit the files on your computer, then upload the changed files again (or `git add . && git commit -m "Update" && git push`). GitHub re-publishes automatically in a minute or two. If you don't see changes, hard-refresh (`Cmd/Ctrl + Shift + R`).
+See **section 4b** for the easiest way: edit or upload files directly on github.com, then click **Commit changes**. The site updates itself. If you don't see your change, hard-refresh the page (**Ctrl + Shift + R**, or **Cmd + Shift + R** on Mac).
 
-You can also edit straight on github.com: open any file → pencil icon → edit → **Commit changes**. Handy for quick fixes to `projects.json`.
+### Optional: a shorter address
 
-### Optional: custom domain
-
-Bought a domain like `yourname.com`? In **Settings → Pages → Custom domain**, enter it and click **Save**, then follow GitHub's DNS instructions shown there. Tick **Enforce HTTPS** once it becomes available.
+- **`https://kamsinkem.github.io`** (without `/portfolio`): in **Settings → General**, rename the repository to exactly **`kamsinkem.github.io`**.
+- **Your own domain** (like `kamsinkem.com`, bought from a domain seller): in **Settings → Pages → Custom domain**, type it in and click **Save**, then follow the DNS steps GitHub shows. Tick **Enforce HTTPS** once it becomes available.
 
 ---
 
